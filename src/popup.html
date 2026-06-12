@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="popup.css" />
+    <title>Teq... block'em!</title>
+  </head>
+  <body>
+    <header>
+      <h1>Teq... block'em!</h1>
+      <label class="switch-field" title="Auto-collect matches as you browse X">
+        <span>Auto-collect</span>
+        <span class="switch">
+          <input id="autoCollect" type="checkbox" />
+          <span class="slider"></span>
+        </span>
+      </label>
+    </header>
+
+    <div id="error" class="error" hidden></div>
+
+    <label class="field">
+      <span>Words / emoji to match (one per line)</span>
+      <textarea id="words" rows="6" placeholder="crypto&#10;airdrop&#10;🚀"></textarea>
+    </label>
+
+    <div id="progress" class="progress" hidden>
+      <span class="dot"></span>
+      <span id="progressText"></span>
+      <button id="pauseToggle" type="button" class="pause-toggle" aria-label="Pause">⏸</button>
+    </div>
+
+    <section class="collected">
+      <div class="collected-head">
+        <span id="collectedCount">0 collected</span>
+        <a id="viewCollected" class="link" href="collected.html" target="_blank" rel="noreferrer">View all →</a>
+        <button id="clearCollected" type="button" class="link" hidden>Clear</button>
+      </div>
+      <ul id="collectedList" class="collected-list"></ul>
+      <p id="collectedEmpty" class="note">Nothing collected yet.</p>
+      <button id="review" type="button" class="block-btn" disabled>Review and block</button>
+      <span id="runStatus" class="runStatus"></span>
+    </section>
+
+    <div class="stats">
+      <strong id="count">0</strong> blocked total
+      <a id="viewAll" href="blocks.html" target="_blank" rel="noreferrer">Recent blocks →</a>
+    </div>
+
+    <p class="note">
+      Matches are collected as you browse X. Review the list, then block. Blocks are paced apart (configurable in
+      Options) to stay under X's automation radar — keep the X tab open.
+    </p>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

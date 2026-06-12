@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="blocks.css" />
+    <title>Collected accounts — Teq</title>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <h2 class="brand">Teq</h2>
+        <nav>
+          <a class="nav-link" href="blocks.html">Blocked <span class="nav-count" id="navCountBlocked"></span></a>
+          <a class="nav-link" aria-current="page" href="collected.html">Collected <span class="nav-count" id="navCount"></span></a>
+          <a class="nav-link" href="options.html">Options</a>
+        </nav>
+      </aside>
+      <main>
+        <header>
+          <div>
+            <h1>Collected accounts</h1>
+            <p class="count"><strong id="count">0</strong> total</p>
+          </div>
+          <div class="actions">
+            <button id="import" type="button" class="action">Import CSV</button>
+            <button id="export" type="button" class="action">Export CSV</button>
+            <button id="clear" type="button" class="clear">Clear list</button>
+          </div>
+        </header>
+
+        <div class="filters">
+          <input id="search" type="search" placeholder="Search by username or name…" autocomplete="off" />
+          <select id="lang" aria-label="Filter by language">
+            <option value="">All languages</option>
+          </select>
+        </div>
+
+        <ul id="list" class="list"></ul>
+        <p id="empty" class="empty" hidden>Nothing collected yet.</p>
+
+        <nav id="pager" class="pager" hidden>
+          <button id="prev" type="button">← Prev</button>
+          <span id="pageInfo"></span>
+          <button id="next" type="button">Next →</button>
+        </nav>
+      </main>
+    </div>
+
+    <script src="collected.js"></script>
+  </body>
+</html>

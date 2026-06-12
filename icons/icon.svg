@@ -1,0 +1,24 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1d1f23"/>
+      <stop offset="1" stop-color="#0a0a0b"/>
+    </linearGradient>
+    <linearGradient id="ban" x1="0" y1="0" x2="0" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ff5a5a"/>
+      <stop offset="1" stop-color="#e01515"/>
+    </linearGradient>
+  </defs>
+
+  <!-- rounded background -->
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#bg)"/>
+
+  <!-- X (twitter) logo, centered -->
+  <g fill="#ffffff">
+    <path d="M76.3 36H86l-21.1 24.1L89.6 92H70.4L55.4 72.3 38.2 92H28.5l22.6-25.8L26.6 36h19.7l13.5 17.9L76.3 36zm-3.4 50.4h5.4L43.4 41.3h-5.8l35.3 45.1z"/>
+  </g>
+
+  <!-- prohibition ring + slash -->
+  <circle cx="64" cy="64" r="44" fill="none" stroke="url(#ban)" stroke-width="10" opacity="0.95"/>
+  <line x1="33" y1="33" x2="95" y2="95" stroke="url(#ban)" stroke-width="10" stroke-linecap="round" opacity="0.95"/>
+</svg>
