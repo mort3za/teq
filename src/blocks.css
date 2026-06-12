@@ -22,6 +22,8 @@ body {
   flex: 0 0 200px;
   padding: 24px 16px;
   border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
 }
 
 .brand {
@@ -56,6 +58,27 @@ body {
 .nav-count {
   opacity: 0.7;
   font-variant-numeric: tabular-nums;
+}
+
+.repo-link {
+  margin-top: auto;
+  padding-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.repo-link:hover {
+  color: var(--accent);
+}
+
+.repo-link svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
 }
 
 main {
@@ -131,6 +154,7 @@ h1 {
 
 #search {
   flex: 1;
+  width: 100%;
   min-width: 0;
   box-sizing: border-box;
   font: inherit;

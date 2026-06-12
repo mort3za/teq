@@ -183,13 +183,19 @@
   var countEl = null;
   var statusEl = null;
   var langSel = null;
+  var searchEl = null;
   var selected = new Set;
   var collected = [];
   var langFilter = "";
+  var searchTerm = "";
   var blocking = false;
   var onBlock = () => {};
   function visible() {
-    return langFilter ? collected.filter((u) => u.lang === langFilter) : collected;
+    let rows = langFilter ? collected.filter((u) => u.lang === langFilter) : collected;
+    if (searchTerm) {
+      rows = rows.filter((u) => u.handle.toLowerCase().includes(searchTerm) || u.name.toLowerCase().includes(searchTerm));
+    }
+    return rows;
   }
   var STYLE = `
   :host { all: initial; }
@@ -249,17 +255,19 @@
   .btn-primary:disabled { opacity: .5; cursor: default; }
   .btn-ghost { background: transparent; color: inherit; text-decoration: underline; }
   .status { color: #536471; font-size: 13px; }
-  .lang-sel {
+  .lang-sel, .search {
     font: inherit; padding: 6px 10px; border-radius: 8px;
-    border: 1px solid #ccd6dd; background: #fff; color: inherit; cursor: pointer;
+    border: 1px solid #ccd6dd; background: #fff; color: inherit;
   }
+  .lang-sel { cursor: pointer; }
+  .search { width: 180px; }
   @media (prefers-color-scheme: dark) {
     .card { background: #15202b; color: #e7e9ea; }
     .head, .foot { border-color: #38444d; }
     .cell { background: #1e2a36; }
     .cell:hover { background: #243340; }
     .icon-btn { color: #8b98a5; }
-    .lang-sel { background: #1e2a36; border-color: #38444d; }
+    .lang-sel, .search { background: #1e2a36; border-color: #38444d; }
     .status { color: #8b98a5; }
   }
 `;
@@ -284,6 +292,14 @@
     countEl.className = "handle";
     const spacer = document.createElement("div");
     spacer.className = "spacer";
+    searchEl = document.createElement("input");
+    searchEl.className = "search";
+    searchEl.type = "search";
+    searchEl.placeholder = "Search name or @handle";
+    searchEl.addEventListener("input", () => {
+      searchTerm = searchEl.value.trim().toLowerCase();
+      render();
+    });
     langSel = document.createElement("select");
     langSel.className = "lang-sel";
     langSel.addEventListener("change", () => {
@@ -309,7 +325,7 @@
     closeBtn.className = "btn btn-ghost";
     closeBtn.textContent = "Close";
     closeBtn.addEventListener("click", close);
-    head.append(title, countEl, spacer, langSel, selAll, closeBtn);
+    head.append(title, countEl, spacer, searchEl, langSel, selAll, closeBtn);
     grid = document.createElement("div");
     grid.className = "grid";
     const foot = document.createElement("div");
@@ -397,13 +413,13 @@
       return;
     syncLangOptions();
     const rows = visible();
-    countEl.textContent = langFilter && rows.length !== collected.length ? `${rows.length} of ${collected.length} collected` : `${collected.length} collected`;
+    countEl.textContent = rows.length !== collected.length ? `${rows.length} of ${collected.length} collected` : `${collected.length} collected`;
     if (rows.length) {
       grid.replaceChildren(...rows.map(cell));
     } else {
       const empty = document.createElement("div");
       empty.className = "empty";
-      empty.textContent = collected.length ? "None in this language." : "Nothing collected.";
+      empty.textContent = collected.length ? "No matches." : "Nothing collected.";
       grid.replaceChildren(empty);
     }
     updateBlockBtn();
@@ -448,6 +464,9 @@
     blocking = false;
     if (statusEl)
       statusEl.textContent = "";
+    searchTerm = "";
+    if (searchEl)
+      searchEl.value = "";
     collected = [...await getCollected()].reverse();
     selected = new Set(collected.map((u) => u.handle.toLowerCase()));
     render();

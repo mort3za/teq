@@ -17,6 +17,7 @@ const maxPerDay = $<HTMLInputElement>("maxPerDay");
 const status = $<HTMLElement>("status");
 const exportBtn = $<HTMLButtonElement>("export");
 const importBtn = $<HTMLButtonElement>("import");
+const resetAdvancedBtn = $<HTMLButtonElement>("resetAdvanced");
 
 function note(msg: string): void {
   status.textContent = msg;
@@ -75,6 +76,14 @@ scan.addEventListener("change", () => void save());
 pacing.addEventListener("change", () => void save());
 maxPerHour.addEventListener("change", () => void save());
 maxPerDay.addEventListener("change", () => void save());
+
+resetAdvancedBtn.addEventListener("click", async () => {
+  scan.value = String(DEFAULT_CONFIG.scanSeconds);
+  pacing.value = String(DEFAULT_CONFIG.pacingSeconds);
+  maxPerHour.value = String(DEFAULT_CONFIG.maxPerHour);
+  maxPerDay.value = String(DEFAULT_CONFIG.maxPerDay);
+  await save();
+});
 
 exportBtn.addEventListener("click", async () => {
   const cfg = await getConfig();

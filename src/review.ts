@@ -15,19 +15,28 @@ let blockBtn: HTMLButtonElement | null = null;
 let countEl: HTMLElement | null = null;
 let statusEl: HTMLElement | null = null;
 let langSel: HTMLSelectElement | null = null;
+let searchEl: HTMLInputElement | null = null;
 
 // Lowercased handles checked for blocking.
 let selected = new Set<string>();
 let collected: CollectedUser[] = [];
 // Selected language code, or "" for all.
 let langFilter = "";
+// Lowercased search term matched against name/handle, or "" for all.
+let searchTerm = "";
 // True while a paced block run is in progress (modal stays open to show it).
 let blocking = false;
 let onBlock: (handles: string[], onProgress: (p: BlockProgress) => void) => void = () => {};
 
-/** Users matching the active language filter. */
+/** Users matching the active language filter and search term. */
 function visible(): CollectedUser[] {
-  return langFilter ? collected.filter((u) => u.lang === langFilter) : collected;
+  let rows = langFilter ? collected.filter((u) => u.lang === langFilter) : collected;
+  if (searchTerm) {
+    rows = rows.filter(
+      (u) => u.handle.toLowerCase().includes(searchTerm) || u.name.toLowerCase().includes(searchTerm),
+    );
+  }
+  return rows;
 }
 
 const STYLE = `
@@ -88,17 +97,19 @@ const STYLE = `
   .btn-primary:disabled { opacity: .5; cursor: default; }
   .btn-ghost { background: transparent; color: inherit; text-decoration: underline; }
   .status { color: #536471; font-size: 13px; }
-  .lang-sel {
+  .lang-sel, .search {
     font: inherit; padding: 6px 10px; border-radius: 8px;
-    border: 1px solid #ccd6dd; background: #fff; color: inherit; cursor: pointer;
+    border: 1px solid #ccd6dd; background: #fff; color: inherit;
   }
+  .lang-sel { cursor: pointer; }
+  .search { width: 180px; }
   @media (prefers-color-scheme: dark) {
     .card { background: #15202b; color: #e7e9ea; }
     .head, .foot { border-color: #38444d; }
     .cell { background: #1e2a36; }
     .cell:hover { background: #243340; }
     .icon-btn { color: #8b98a5; }
-    .lang-sel { background: #1e2a36; border-color: #38444d; }
+    .lang-sel, .search { background: #1e2a36; border-color: #38444d; }
     .status { color: #8b98a5; }
   }
 `;
@@ -127,6 +138,14 @@ function mount(): void {
   countEl.className = "handle";
   const spacer = document.createElement("div");
   spacer.className = "spacer";
+  searchEl = document.createElement("input");
+  searchEl.className = "search";
+  searchEl.type = "search";
+  searchEl.placeholder = "Search name or @handle";
+  searchEl.addEventListener("input", () => {
+    searchTerm = searchEl!.value.trim().toLowerCase();
+    render();
+  });
   langSel = document.createElement("select");
   langSel.className = "lang-sel";
   langSel.addEventListener("change", () => {
@@ -150,7 +169,7 @@ function mount(): void {
   closeBtn.className = "btn btn-ghost";
   closeBtn.textContent = "Close";
   closeBtn.addEventListener("click", close);
-  head.append(title, countEl, spacer, langSel, selAll, closeBtn);
+  head.append(title, countEl, spacer, searchEl, langSel, selAll, closeBtn);
 
   grid = document.createElement("div");
   grid.className = "grid";
@@ -245,7 +264,7 @@ function render(): void {
   syncLangOptions();
   const rows = visible();
   countEl.textContent =
-    langFilter && rows.length !== collected.length
+    rows.length !== collected.length
       ? `${rows.length} of ${collected.length} collected`
       : `${collected.length} collected`;
   if (rows.length) {
@@ -253,7 +272,7 @@ function render(): void {
   } else {
     const empty = document.createElement("div");
     empty.className = "empty";
-    empty.textContent = collected.length ? "None in this language." : "Nothing collected.";
+    empty.textContent = collected.length ? "No matches." : "Nothing collected.";
     grid.replaceChildren(empty);
   }
   updateBlockBtn();
@@ -306,6 +325,8 @@ export async function openReview(
   host!.style.display = "block";
   blocking = false;
   if (statusEl) statusEl.textContent = "";
+  searchTerm = "";
+  if (searchEl) searchEl.value = "";
   collected = [...(await getCollected())].reverse();
   selected = new Set(collected.map((u) => u.handle.toLowerCase()));
   render();

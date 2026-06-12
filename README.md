@@ -1,4 +1,4 @@
-# x-teq
+# teq
 
 Chrome extension. Collect X.com (Twitter) users whose **display name or @handle** matches your word/emoji rules, review them, then block.
 
@@ -16,14 +16,14 @@ Chrome extension. Collect X.com (Twitter) users whose **display name or @handle*
 
 Edit rules and the auto-collect toggle in the popup; the full settings live on the **Options** page (`options.html`, opens in a tab).
 
-| field          | meaning                                                            | default |
-| -------------- | ------------------------------------------------------------------ | ------- |
-| `words`        | substrings; display name or @handle containing any → match         | `[]`    |
-| `autoCollect`  | auto-scan the page for matches on an interval                      | `true`  |
-| `scanSeconds`  | seconds between automatic page scans                               | `3`     |
-| `pacingSeconds`| base seconds to wait between blocks (+ up to 30% random jitter)     | `30`    |
-| `maxPerHour`   | max blocks in any rolling 60-minute window (`0` = no limit)        | `40`    |
-| `maxPerDay`    | max blocks in any rolling 24-hour window (`0` = no limit)          | `250`   |
+| field           | meaning                                                         | default |
+| --------------- | --------------------------------------------------------------- | ------- |
+| `words`         | substrings; display name or @handle containing any → match      | `[]`    |
+| `autoCollect`   | auto-scan the page for matches on an interval                   | `true`  |
+| `scanSeconds`   | seconds between automatic page scans                            | `3`     |
+| `pacingSeconds` | base seconds to wait between blocks (+ up to 30% random jitter) | `30`    |
+| `maxPerHour`    | max blocks in any rolling 60-minute window (`0` = no limit)     | `40`    |
+| `maxPerDay`     | max blocks in any rolling 24-hour window (`0` = no limit)       | `250`   |
 
 Config lives in `chrome.storage.sync` (roams with your account). The collected list, block log, run progress, the active block queue, and last error live in `chrome.storage.local` (the log keeps the last 500 entries).
 

@@ -158,6 +158,7 @@
   var status = $("status");
   var exportBtn = $("export");
   var importBtn = $("import");
+  var resetAdvancedBtn = $("resetAdvanced");
   function note(msg) {
     status.textContent = msg;
     setTimeout(() => status.textContent = "", 1500);
@@ -213,6 +214,13 @@
   pacing.addEventListener("change", () => void save());
   maxPerHour.addEventListener("change", () => void save());
   maxPerDay.addEventListener("change", () => void save());
+  resetAdvancedBtn.addEventListener("click", async () => {
+    scan.value = String(DEFAULT_CONFIG.scanSeconds);
+    pacing.value = String(DEFAULT_CONFIG.pacingSeconds);
+    maxPerHour.value = String(DEFAULT_CONFIG.maxPerHour);
+    maxPerDay.value = String(DEFAULT_CONFIG.maxPerDay);
+    await save();
+  });
   exportBtn.addEventListener("click", async () => {
     const cfg = await getConfig();
     const blob = new Blob([JSON.stringify(cfg, null, 2)], {
