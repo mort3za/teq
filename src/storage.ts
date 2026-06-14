@@ -2,6 +2,8 @@
 // Config lives in `sync` (small, roams with the account); the block log and
 // last error live in `local` (can grow, no sync quota pressure).
 
+import { type Lang, detectLang } from "./i18n.ts";
+
 export interface Config {
   /** Case-insensitive substrings; a display name containing any of these matches. */
   words: string[];
@@ -18,6 +20,11 @@ export interface Config {
   /** Max blocks allowed within any rolling 24-hour window (0 = no limit).
    * The run pauses when this is reached. */
   maxPerDay: number;
+  /** UI language for the extension's own pages and overlay. */
+  lang: Lang;
+  /** Fold Persian/Arabic letter and digit variants when matching (off by
+   * default; useful for Persian/Arabic rules). */
+  persianNormalize: boolean;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -27,6 +34,8 @@ export const DEFAULT_CONFIG: Config = {
   pacingSeconds: 30,
   maxPerHour: 40,
   maxPerDay: 250,
+  lang: detectLang(),
+  persianNormalize: false,
 };
 
 /** A matched user waiting to be reviewed and blocked. */

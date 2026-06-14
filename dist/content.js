@@ -1,11 +1,28 @@
 (() => {
   // src/matcher.ts
+  var FOLD = {
+    "ي": "ی",
+    "ى": "ی",
+    "ك": "ک",
+    "‌": ""
+  };
+  function normalizePersian(text) {
+    let out = text.normalize("NFC").replace(/[يىك‌]/g, (c) => FOLD[c]);
+    out = out.replace(/[٠-٩۰-۹]/g, (c) => {
+      const code = c.codePointAt(0);
+      const base = code >= 1776 ? 1776 : 1632;
+      return String(code - base);
+    });
+    return out;
+  }
   function matchReason(name, opts) {
-    const haystack = name.toLowerCase();
+    const fold = (s) => (opts.normalize ? normalizePersian(s) : s).toLowerCase();
+    const haystack = fold(name);
     for (const word of opts.words) {
-      const needle = word.trim().toLowerCase();
+      const trimmed = word.trim();
+      const needle = fold(trimmed);
       if (needle && haystack.includes(needle))
-        return word.trim();
+        return trimmed;
     }
     return null;
   }
@@ -51,6 +68,231 @@
     }
   }
 
+  // src/i18n.ts
+  var en = {
+    "nav.blocked": "Blocked",
+    "nav.collected": "Collected",
+    "nav.options": "Options",
+    "common.total": "total",
+    "common.clear": "Clear",
+    "common.clearList": "Clear list",
+    "common.importCsv": "Import CSV",
+    "common.exportCsv": "Export CSV",
+    "common.searchPlaceholder": "Search by username or name…",
+    "common.allLanguages": "All languages",
+    "common.remove": "Remove",
+    "common.prev": "← Prev",
+    "common.next": "Next →",
+    "common.pageInfo": "Page {page} of {pages}",
+    "common.wordsLabel": "Words / emoji to match (one per line)",
+    "popup.title": "Teq... block'em!",
+    "popup.autoCollect": "Auto-collect",
+    "popup.autoCollectTitle": "Auto-collect matches as you browse X",
+    "popup.viewAll": "View all →",
+    "popup.nothingCollected": "Nothing collected yet.",
+    "popup.reviewAndBlock": "Review and block",
+    "popup.blockedTotal": "blocked total",
+    "popup.recentBlocks": "Recent blocks →",
+    "popup.note": "Matches are collected as you browse X. Review the list, then block. Blocks are paced apart (configurable in Options) to stay under X's automation radar — keep the X tab open.",
+    "popup.collectedCount": "{n} collected",
+    "popup.progress.blocking": "Blocking {done} of {total}…",
+    "popup.progress.paused": "Paused — {done} of {total}",
+    "popup.progress.waiting": "Waiting{suffix} — {done} of {total}",
+    "popup.resumesIn": " (resumes in {time})",
+    "popup.aria.pause": "Pause",
+    "popup.aria.resume": "Resume",
+    "popup.openXControl": "Open the X tab to control the run.",
+    "popup.reloadX": "Reload the X tab, then try again.",
+    "popup.openXFirst": "Open an x.com tab first.",
+    "options.title": "Options",
+    "options.subtitle": "Blocking behaviour",
+    "options.importJson": "Import JSON",
+    "options.exportJson": "Export JSON",
+    "options.autoCollectLabel": "Auto-collect matches as you browse",
+    "options.autoCollectHint": "When on, the content script scans X for matches automatically. Turn it off to pause collecting without losing your rules.",
+    "options.wordsHint": "A display name or @handle containing any of these (case-insensitive) is collected.",
+    "options.language": "Language",
+    "options.languageHint": "Language of this extension's interface.",
+    "options.persianNormalize": "Match Persian / Arabic letter and digit variants",
+    "options.persianNormalizeHint": "Treats Arabic ي/ك and Persian ی/ک — and Arabic-Indic vs. Persian digits — as the same when matching. Off by default; turn it on for Persian/Arabic rules.",
+    "options.advanced": "Advanced",
+    "options.warning": "⚠️ These pacing and rate limits are tuned to keep blocking under X's automation radar. Raising them — or blocking faster than the recommended ranges — makes your activity look automated, which can get your X account rate-limited, temporarily locked, or permanently suspended. Only change these if you understand the risk.",
+    "options.scanLabel": "Seconds between scans",
+    "options.scanHint": "How often the page is automatically scanned for new matches while auto-collect is on.",
+    "options.pacingLabel": "Seconds between blocks",
+    "options.pacingHint": "Each block waits this long (plus a little random jitter) before the next. X flags rapid-fire blocking as automation — 30s or more is recommended.",
+    "options.maxPerHourLabel": "Max blocks per hour",
+    "options.maxPerHourHint": "The run pauses once this many blocks happen within any rolling 60-minute window. Safe range is ~30–50; 0 disables the limit.",
+    "options.maxPerDayLabel": "Max blocks per day",
+    "options.maxPerDayHint": "The run pauses once this many blocks happen within any rolling 24-hour window. Safe range is ~200–300; approaching it can trigger a 24h cooling-off on X. 0 disables the limit.",
+    "options.reset": "Reset to defaults",
+    "options.resetHint": "Restore the recommended scan, pacing, and rate-limit values above.",
+    "options.saved": "Saved.",
+    "options.imported": "Imported.",
+    "options.importInvalid": "Import failed: invalid JSON.",
+    "options.importNoSettings": "Import failed: no recognized settings.",
+    "collected.title": "Collected accounts",
+    "collected.filterByLang": "Filter by language",
+    "collected.empty": "Nothing collected yet.",
+    "collected.inProgress": "In progress",
+    "collected.confirmClear": "Clear the entire collected list? This can't be undone.",
+    "collected.importNoHandle": 'Import failed: CSV needs a "handle" column.',
+    "collected.importNoRows": "Import failed: no rows with a handle found.",
+    "blocks.title": "Blocked accounts",
+    "blocks.empty": "No blocked accounts yet.",
+    "blocks.confirmClear": "Clear the entire blocked-accounts list? This can't be undone.",
+    "review.title": "Review & block",
+    "review.searchPlaceholder": "Search name or @handle",
+    "review.selectAll": "Select all",
+    "review.close": "Close",
+    "review.noMatches": "No matches.",
+    "review.nothingCollected": "Nothing collected.",
+    "review.blockingBtn": "Blocking…",
+    "review.blockN": "Block {n} selected",
+    "review.count": "{n} collected",
+    "review.countFiltered": "{shown} of {total} collected",
+    "review.statusBlocking": "Blocking {done}/{total}…",
+    "review.statusPaused": "Paused{err} — {done}/{total}",
+    "review.statusWaiting": "{err} — {done}/{total}",
+    "review.statusDone": "Done — blocked {done}/{total}.",
+    "review.errSuffix": " ({err})",
+    "run.dailyLimit": "Daily limit ({n})",
+    "run.hourlyLimit": "Hourly limit ({n})",
+    "run.capReached": "{limit} reached — auto-resuming in {time}."
+  };
+  var fa = {
+    "nav.blocked": "مسدودشده‌ها",
+    "nav.collected": "جمع‌آوری‌شده‌ها",
+    "nav.options": "تنظیمات",
+    "common.total": "مجموع",
+    "common.clear": "پاک کردن",
+    "common.clearList": "پاک کردن فهرست",
+    "common.importCsv": "ورود CSV",
+    "common.exportCsv": "خروج CSV",
+    "common.searchPlaceholder": "جستجو بر اساس نام کاربری یا نام…",
+    "common.allLanguages": "همهٔ زبان‌ها",
+    "common.remove": "حذف",
+    "common.prev": "→ قبلی",
+    "common.next": "بعدی ←",
+    "common.pageInfo": "صفحهٔ {page} از {pages}",
+    "common.wordsLabel": "کلمات / ایموجی برای تطبیق (هر کدام در یک خط)",
+    "popup.title": "تک... بلاکشون کن!",
+    "popup.autoCollect": "جمع‌آوری خودکار",
+    "popup.autoCollectTitle": "جمع‌آوری خودکار موارد منطبق هنگام مرور X",
+    "popup.viewAll": "مشاهدهٔ همه ←",
+    "popup.nothingCollected": "هنوز چیزی جمع‌آوری نشده.",
+    "popup.reviewAndBlock": "بررسی و مسدودسازی",
+    "popup.blockedTotal": "مجموع مسدودشده",
+    "popup.recentBlocks": "مسدودسازی‌های اخیر ←",
+    "popup.note": "موارد منطبق هنگام مرور X جمع‌آوری می‌شوند. فهرست را بررسی کنید، سپس مسدود کنید. مسدودسازی‌ها با فاصلهٔ زمانی (قابل تنظیم در تنظیمات) انجام می‌شوند تا از رادار خودکارسازی X دور بمانند — تب X را باز نگه دارید.",
+    "popup.collectedCount": "{n} جمع‌آوری‌شده",
+    "popup.progress.blocking": "در حال مسدودسازی {done} از {total}…",
+    "popup.progress.paused": "متوقف شد — {done} از {total}",
+    "popup.progress.waiting": "در انتظار{suffix} — {done} از {total}",
+    "popup.resumesIn": " (ازسرگیری در {time})",
+    "popup.aria.pause": "توقف",
+    "popup.aria.resume": "ازسرگیری",
+    "popup.openXControl": "برای کنترل اجرا، تب X را باز کنید.",
+    "popup.reloadX": "تب X را دوباره بارگذاری کنید و دوباره تلاش کنید.",
+    "popup.openXFirst": "ابتدا یک تب x.com باز کنید.",
+    "options.title": "تنظیمات",
+    "options.subtitle": "رفتار مسدودسازی",
+    "options.importJson": "ورود JSON",
+    "options.exportJson": "خروج JSON",
+    "options.autoCollectLabel": "جمع‌آوری خودکار موارد منطبق هنگام مرور",
+    "options.autoCollectHint": "وقتی روشن باشد، اسکریپت محتوا به‌طور خودکار X را برای موارد منطبق اسکن می‌کند. برای توقف جمع‌آوری بدون از دست رفتن قواعد، آن را خاموش کنید.",
+    "options.wordsHint": "هر نام نمایشی یا @نام‌کاربری که شامل هر یک از این‌ها باشد (بدون حساسیت به بزرگی/کوچکی) جمع‌آوری می‌شود.",
+    "options.language": "زبان",
+    "options.languageHint": "زبان رابط کاربری این افزونه.",
+    "options.persianNormalize": "تطبیق گونه‌های حروف و ارقام فارسی / عربی",
+    "options.persianNormalizeHint": "هنگام تطبیق، ي/ك عربی و ی/ک فارسی — و ارقام عربی در برابر فارسی — یکسان در نظر گرفته می‌شوند. به‌طور پیش‌فرض خاموش است؛ برای قواعد فارسی/عربی روشنش کنید.",
+    "options.advanced": "پیشرفته",
+    "options.warning": "⚠️ این فاصله‌ها و محدودیت‌های نرخ طوری تنظیم شده‌اند که مسدودسازی زیر رادار خودکارسازی X بماند. افزایش آن‌ها — یا مسدودسازی سریع‌تر از بازه‌های توصیه‌شده — فعالیت شما را خودکار جلوه می‌دهد و می‌تواند حساب X شما را محدود، موقتاً قفل یا برای همیشه معلق کند. فقط در صورتی این‌ها را تغییر دهید که خطر را می‌دانید.",
+    "options.scanLabel": "ثانیه بین هر اسکن",
+    "options.scanHint": "هر چند وقت یک‌بار صفحه به‌طور خودکار برای موارد منطبق جدید اسکن شود، تا وقتی جمع‌آوری خودکار روشن است.",
+    "options.pacingLabel": "ثانیه بین هر مسدودسازی",
+    "options.pacingHint": "هر مسدودسازی این مدت (به‌علاوهٔ کمی تأخیر تصادفی) پیش از بعدی صبر می‌کند. X مسدودسازی پرسرعت را خودکار تشخیص می‌دهد — ۳۰ ثانیه یا بیشتر توصیه می‌شود.",
+    "options.maxPerHourLabel": "حداکثر مسدودسازی در ساعت",
+    "options.maxPerHourHint": "اجرا پس از این تعداد مسدودسازی در هر بازهٔ متحرک ۶۰ دقیقه‌ای متوقف می‌شود. بازهٔ ایمن حدود ۳۰ تا ۵۰ است؛ ۰ محدودیت را غیرفعال می‌کند.",
+    "options.maxPerDayLabel": "حداکثر مسدودسازی در روز",
+    "options.maxPerDayHint": "اجرا پس از این تعداد مسدودسازی در هر بازهٔ متحرک ۲۴ ساعته متوقف می‌شود. بازهٔ ایمن حدود ۲۰۰ تا ۳۰۰ است؛ نزدیک شدن به آن می‌تواند یک دورهٔ خنک‌سازی ۲۴ ساعته در X ایجاد کند. ۰ محدودیت را غیرفعال می‌کند.",
+    "options.reset": "بازنشانی به پیش‌فرض",
+    "options.resetHint": "مقادیر توصیه‌شدهٔ اسکن، فاصله و محدودیت نرخ بالا را بازگردانید.",
+    "options.saved": "ذخیره شد.",
+    "options.imported": "وارد شد.",
+    "options.importInvalid": "ورود ناموفق: JSON نامعتبر.",
+    "options.importNoSettings": "ورود ناموفق: تنظیمات شناخته‌شده‌ای یافت نشد.",
+    "collected.title": "حساب‌های جمع‌آوری‌شده",
+    "collected.filterByLang": "فیلتر بر اساس زبان",
+    "collected.empty": "هنوز چیزی جمع‌آوری نشده.",
+    "collected.inProgress": "در حال انجام",
+    "collected.confirmClear": "کل فهرست جمع‌آوری‌شده پاک شود؟ این کار قابل بازگشت نیست.",
+    "collected.importNoHandle": "ورود ناموفق: فایل CSV به ستون «handle» نیاز دارد.",
+    "collected.importNoRows": "ورود ناموفق: هیچ ردیفی با نام کاربری یافت نشد.",
+    "blocks.title": "حساب‌های مسدودشده",
+    "blocks.empty": "هنوز حسابی مسدود نشده.",
+    "blocks.confirmClear": "کل فهرست حساب‌های مسدودشده پاک شود؟ این کار قابل بازگشت نیست.",
+    "review.title": "بررسی و مسدودسازی",
+    "review.searchPlaceholder": "جستجوی نام یا @نام‌کاربری",
+    "review.selectAll": "انتخاب همه",
+    "review.close": "بستن",
+    "review.noMatches": "موردی یافت نشد.",
+    "review.nothingCollected": "چیزی جمع‌آوری نشده.",
+    "review.blockingBtn": "در حال مسدودسازی…",
+    "review.blockN": "مسدودسازی {n} مورد انتخاب‌شده",
+    "review.count": "{n} جمع‌آوری‌شده",
+    "review.countFiltered": "{shown} از {total} جمع‌آوری‌شده",
+    "review.statusBlocking": "در حال مسدودسازی {done}/{total}…",
+    "review.statusPaused": "متوقف شد{err} — {done}/{total}",
+    "review.statusWaiting": "{err} — {done}/{total}",
+    "review.statusDone": "انجام شد — {done}/{total} مسدود شد.",
+    "review.errSuffix": " ({err})",
+    "run.dailyLimit": "محدودیت روزانه ({n})",
+    "run.hourlyLimit": "محدودیت ساعتی ({n})",
+    "run.capReached": "{limit} رسید — ازسرگیری خودکار در {time}."
+  };
+  var DICTS = { en, fa };
+  var current = "en";
+  function detectLang() {
+    try {
+      return chrome.i18n.getUILanguage().toLowerCase().startsWith("fa") ? "fa" : "en";
+    } catch {
+      return "en";
+    }
+  }
+  function setLang(l) {
+    current = DICTS[l] ? l : "en";
+  }
+  function getLang() {
+    return current;
+  }
+  function isRtl(l = current) {
+    return l === "fa";
+  }
+  function t(key, params) {
+    const tmpl = DICTS[current][key] ?? en[key] ?? key;
+    if (!params)
+      return tmpl;
+    return tmpl.replace(/\{(\w+)\}/g, (m, name) => (name in params) ? String(params[name]) : m);
+  }
+  function applyI18n(doc = document) {
+    const html = doc.documentElement;
+    html.lang = current;
+    html.dir = isRtl() ? "rtl" : "ltr";
+    for (const el of doc.querySelectorAll("[data-i18n]")) {
+      el.textContent = t(el.dataset.i18n);
+    }
+    for (const el of doc.querySelectorAll("[data-i18n-placeholder]")) {
+      el.placeholder = t(el.dataset.i18nPlaceholder);
+    }
+    for (const el of doc.querySelectorAll("[data-i18n-title]")) {
+      el.title = t(el.dataset.i18nTitle);
+    }
+    for (const el of doc.querySelectorAll("[data-i18n-aria]")) {
+      el.setAttribute("aria-label", t(el.dataset.i18nAria));
+    }
+  }
+
   // src/storage.ts
   var DEFAULT_CONFIG = {
     words: [],
@@ -58,7 +300,9 @@
     scanSeconds: 3,
     pacingSeconds: 30,
     maxPerHour: 40,
-    maxPerDay: 250
+    maxPerDay: 250,
+    lang: detectLang(),
+    persianNormalize: false
   };
   var LOG_KEY = "blockLog";
   var ERROR_KEY = "lastError";
@@ -178,6 +422,8 @@
   // src/review.ts
   var host = null;
   var root = null;
+  var backdrop = null;
+  var mountedLang = null;
   var grid = null;
   var blockBtn = null;
   var countEl = null;
@@ -203,7 +449,7 @@
     position: fixed; inset: 0; z-index: 2147483647;
     display: flex; align-items: center; justify-content: center;
     background: rgba(0,0,0,.6);
-    font: 14px/1.4 -apple-system, system-ui, sans-serif;
+    font: 14px/1.4 'Vazirmatn', -apple-system, system-ui, sans-serif;
     color: #0f1419;
   }
   .card {
@@ -276,7 +522,7 @@
     root = host.attachShadow({ mode: "open" });
     const style = document.createElement("style");
     style.textContent = STYLE;
-    const backdrop = document.createElement("div");
+    backdrop = document.createElement("div");
     backdrop.className = "backdrop";
     backdrop.addEventListener("click", (e) => {
       if (e.target === backdrop)
@@ -287,7 +533,7 @@
     const head = document.createElement("div");
     head.className = "head";
     const title = document.createElement("h2");
-    title.textContent = "Review & block";
+    title.textContent = t("review.title");
     countEl = document.createElement("span");
     countEl.className = "handle";
     const spacer = document.createElement("div");
@@ -295,7 +541,7 @@
     searchEl = document.createElement("input");
     searchEl.className = "search";
     searchEl.type = "search";
-    searchEl.placeholder = "Search name or @handle";
+    searchEl.placeholder = t("review.searchPlaceholder");
     searchEl.addEventListener("input", () => {
       searchTerm = searchEl.value.trim().toLowerCase();
       render();
@@ -308,7 +554,7 @@
     });
     const selAll = document.createElement("button");
     selAll.className = "btn btn-ghost";
-    selAll.textContent = "Select all";
+    selAll.textContent = t("review.selectAll");
     selAll.addEventListener("click", () => {
       const rows = visible();
       const keys = rows.map((u) => u.handle.toLowerCase());
@@ -323,7 +569,7 @@
     });
     const closeBtn = document.createElement("button");
     closeBtn.className = "btn btn-ghost";
-    closeBtn.textContent = "Close";
+    closeBtn.textContent = t("review.close");
     closeBtn.addEventListener("click", close);
     head.append(title, countEl, spacer, searchEl, langSel, selAll, closeBtn);
     grid = document.createElement("div");
@@ -342,6 +588,7 @@
     backdrop.append(card);
     root.append(style, backdrop);
     document.body.append(host);
+    mountedLang = getLang();
     chrome.storage.onChanged.addListener((_c, area) => {
       if (area === "local" && host && host.style.display !== "none")
         refresh();
@@ -378,7 +625,7 @@
     label.append(cb, who);
     const rm = document.createElement("button");
     rm.className = "icon-btn";
-    rm.title = "Remove";
+    rm.title = t("common.remove");
     rm.textContent = "✕";
     rm.addEventListener("click", async () => {
       selected.delete(key);
@@ -392,18 +639,18 @@
     if (!blockBtn)
       return;
     if (blocking) {
-      blockBtn.textContent = "Blocking…";
+      blockBtn.textContent = t("review.blockingBtn");
       blockBtn.disabled = true;
       return;
     }
-    blockBtn.textContent = `Block ${selected.size} selected`;
+    blockBtn.textContent = t("review.blockN", { n: selected.size });
     blockBtn.disabled = selected.size === 0;
   }
   function syncLangOptions() {
     if (!langSel)
       return;
     const opts = langOptions(collected);
-    langSel.replaceChildren(new Option("All languages", ""), ...opts.map((c) => new Option(langName(c), c)));
+    langSel.replaceChildren(new Option(t("common.allLanguages"), ""), ...opts.map((c) => new Option(langName(c), c)));
     if (!opts.includes(langFilter))
       langFilter = "";
     langSel.value = langFilter;
@@ -413,13 +660,13 @@
       return;
     syncLangOptions();
     const rows = visible();
-    countEl.textContent = rows.length !== collected.length ? `${rows.length} of ${collected.length} collected` : `${collected.length} collected`;
+    countEl.textContent = rows.length !== collected.length ? t("review.countFiltered", { shown: rows.length, total: collected.length }) : t("review.count", { n: collected.length });
     if (rows.length) {
       grid.replaceChildren(...rows.map(cell));
     } else {
       const empty = document.createElement("div");
       empty.className = "empty";
-      empty.textContent = collected.length ? "No matches." : "Nothing collected.";
+      empty.textContent = collected.length ? t("review.noMatches") : t("review.nothingCollected");
       grid.replaceChildren(empty);
     }
     updateBlockBtn();
@@ -439,16 +686,20 @@
     blocking = true;
     updateBlockBtn();
     if (statusEl)
-      statusEl.textContent = `Blocking 0/${handles.length}…`;
+      statusEl.textContent = t("review.statusBlocking", { done: 0, total: handles.length });
     onBlock(handles, (p) => {
       if (!statusEl)
         return;
       if (p.phase === "blocking" || p.phase === "paused" || p.phase === "waiting") {
-        statusEl.textContent = p.phase === "paused" ? `Paused${p.error ? ` (${p.error})` : ""} — ${p.done}/${p.total}` : p.phase === "waiting" ? `${p.error ?? "Waiting"} — ${p.done}/${p.total}` : `Blocking ${p.done}/${p.total}…`;
+        statusEl.textContent = p.phase === "paused" ? t("review.statusPaused", {
+          err: p.error ? t("review.errSuffix", { err: p.error }) : "",
+          done: p.done,
+          total: p.total
+        }) : p.phase === "waiting" ? t("review.statusWaiting", { err: p.error ?? "", done: p.done, total: p.total }) : t("review.statusBlocking", { done: p.done, total: p.total });
         return;
       }
       blocking = false;
-      statusEl.textContent = `Done — blocked ${p.done}/${p.total}.`;
+      statusEl.textContent = t("review.statusDone", { done: p.done, total: p.total });
       updateBlockBtn();
     });
   }
@@ -458,8 +709,15 @@
   }
   async function openReview(block) {
     onBlock = block;
+    setLang((await getConfig()).lang);
+    if (host && mountedLang !== getLang()) {
+      host.remove();
+      host = null;
+    }
     if (!host)
       mount();
+    if (backdrop)
+      backdrop.dir = isRtl() ? "rtl" : "ltr";
     host.style.display = "block";
     blocking = false;
     if (statusEl)
@@ -483,10 +741,10 @@
   function capReached(timestamps, maxPerHour, maxPerDay, now = Date.now()) {
     let inHour = 0;
     let inDay = 0;
-    for (const t of timestamps) {
-      if (now - t < DAY_MS) {
+    for (const t2 of timestamps) {
+      if (now - t2 < DAY_MS) {
         inDay++;
-        if (now - t < HOUR_MS)
+        if (now - t2 < HOUR_MS)
           inHour++;
       }
     }
@@ -502,7 +760,7 @@
       return 0;
     const windowMs = cap === "day" ? DAY_MS : HOUR_MS;
     const max = cap === "day" ? maxPerDay : maxPerHour;
-    const inWindow = timestamps.filter((t) => now - t < windowMs).sort((a, b) => a - b);
+    const inWindow = timestamps.filter((t2) => now - t2 < windowMs).sort((a, b) => a - b);
     const pivot = inWindow[inWindow.length - max];
     return pivot + windowMs - now;
   }
@@ -587,7 +845,8 @@
       if (key === ownHandle || existing.has(key))
         continue;
       existing.add(key);
-      const reason = matchReason(user.name, cfg) ?? matchReason(user.handle, cfg);
+      const opts = { words: cfg.words, normalize: cfg.persianNormalize };
+      const reason = matchReason(user.name, opts) ?? matchReason(user.handle, opts);
       if (!reason)
         continue;
       found.push({ handle: user.handle, name: user.name, reason, lang: tweetLang(el) });
@@ -629,17 +888,18 @@
   async function waitOutCap() {
     while (!paused) {
       const cfg = await getConfig();
+      setLang(cfg.lang);
       const ts = (await getLog()).map((e) => e.at);
       const active = capReached(ts, cfg.maxPerHour, cfg.maxPerDay);
       if (!active)
         break;
       const waitMs = capRetryMs(ts, cfg.maxPerHour, cfg.maxPerDay);
-      const limit = active === "day" ? `Daily limit (${cfg.maxPerDay})` : `Hourly limit (${cfg.maxPerHour})`;
+      const limit = active === "day" ? t("run.dailyLimit", { n: cfg.maxPerDay }) : t("run.hourlyLimit", { n: cfg.maxPerHour });
       await reportProgress({
         done: blockDone,
         total: blockTotal,
         phase: "waiting",
-        error: `${limit} reached — auto-resuming in ${fmtDuration(waitMs)}.`,
+        error: t("run.capReached", { limit, time: fmtDuration(waitMs) }),
         resumeAt: Date.now() + waitMs
       });
       await sleep(Math.min(waitMs + 1000, CAP_RECHECK_MS));

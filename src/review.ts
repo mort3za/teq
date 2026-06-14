@@ -3,13 +3,17 @@
 // grid that fits many collected users at once. Style-isolated in a Shadow DOM
 // so X's CSS can't reach in and ours can't leak out.
 
-import { getCollected, removeCollected, type CollectedUser, type BlockProgress } from "./storage.ts";
+import { getCollected, getConfig, removeCollected, type CollectedUser, type BlockProgress } from "./storage.ts";
 import { langName, langOptions } from "./lang.ts";
+import { getLang, isRtl, setLang, t, type Lang } from "./i18n.ts";
 
 export type { BlockProgress };
 
 let host: HTMLDivElement | null = null;
 let root: ShadowRoot | null = null;
+let backdrop: HTMLDivElement | null = null;
+// Language the static labels were built in, so we can remount on a live switch.
+let mountedLang: Lang | null = null;
 let grid: HTMLDivElement | null = null;
 let blockBtn: HTMLButtonElement | null = null;
 let countEl: HTMLElement | null = null;
@@ -45,7 +49,7 @@ const STYLE = `
     position: fixed; inset: 0; z-index: 2147483647;
     display: flex; align-items: center; justify-content: center;
     background: rgba(0,0,0,.6);
-    font: 14px/1.4 -apple-system, system-ui, sans-serif;
+    font: 14px/1.4 'Vazirmatn', -apple-system, system-ui, sans-serif;
     color: #0f1419;
   }
   .card {
@@ -121,7 +125,7 @@ function mount(): void {
   const style = document.createElement("style");
   style.textContent = STYLE;
 
-  const backdrop = document.createElement("div");
+  backdrop = document.createElement("div");
   backdrop.className = "backdrop";
   backdrop.addEventListener("click", (e) => {
     if (e.target === backdrop) close();
@@ -133,7 +137,7 @@ function mount(): void {
   const head = document.createElement("div");
   head.className = "head";
   const title = document.createElement("h2");
-  title.textContent = "Review & block";
+  title.textContent = t("review.title");
   countEl = document.createElement("span");
   countEl.className = "handle";
   const spacer = document.createElement("div");
@@ -141,7 +145,7 @@ function mount(): void {
   searchEl = document.createElement("input");
   searchEl.className = "search";
   searchEl.type = "search";
-  searchEl.placeholder = "Search name or @handle";
+  searchEl.placeholder = t("review.searchPlaceholder");
   searchEl.addEventListener("input", () => {
     searchTerm = searchEl!.value.trim().toLowerCase();
     render();
@@ -154,7 +158,7 @@ function mount(): void {
   });
   const selAll = document.createElement("button");
   selAll.className = "btn btn-ghost";
-  selAll.textContent = "Select all";
+  selAll.textContent = t("review.selectAll");
   selAll.addEventListener("click", () => {
     const rows = visible();
     const keys = rows.map((u) => u.handle.toLowerCase());
@@ -167,7 +171,7 @@ function mount(): void {
   });
   const closeBtn = document.createElement("button");
   closeBtn.className = "btn btn-ghost";
-  closeBtn.textContent = "Close";
+  closeBtn.textContent = t("review.close");
   closeBtn.addEventListener("click", close);
   head.append(title, countEl, spacer, searchEl, langSel, selAll, closeBtn);
 
@@ -189,6 +193,7 @@ function mount(): void {
   backdrop.append(card);
   root.append(style, backdrop);
   document.body.append(host);
+  mountedLang = getLang();
 
   // Keep the grid in sync as the paced drain removes blocked users.
   chrome.storage.onChanged.addListener((_c, area) => {
@@ -228,7 +233,7 @@ function cell(u: CollectedUser): HTMLDivElement {
 
   const rm = document.createElement("button");
   rm.className = "icon-btn";
-  rm.title = "Remove";
+  rm.title = t("common.remove");
   rm.textContent = "✕";
   rm.addEventListener("click", async () => {
     selected.delete(key);
@@ -243,18 +248,18 @@ function cell(u: CollectedUser): HTMLDivElement {
 function updateBlockBtn(): void {
   if (!blockBtn) return;
   if (blocking) {
-    blockBtn.textContent = "Blocking…";
+    blockBtn.textContent = t("review.blockingBtn");
     blockBtn.disabled = true;
     return;
   }
-  blockBtn.textContent = `Block ${selected.size} selected`;
+  blockBtn.textContent = t("review.blockN", { n: selected.size });
   blockBtn.disabled = selected.size === 0;
 }
 
 function syncLangOptions(): void {
   if (!langSel) return;
   const opts = langOptions(collected);
-  langSel.replaceChildren(new Option("All languages", ""), ...opts.map((c) => new Option(langName(c), c)));
+  langSel.replaceChildren(new Option(t("common.allLanguages"), ""), ...opts.map((c) => new Option(langName(c), c)));
   if (!opts.includes(langFilter)) langFilter = "";
   langSel.value = langFilter;
 }
@@ -265,14 +270,14 @@ function render(): void {
   const rows = visible();
   countEl.textContent =
     rows.length !== collected.length
-      ? `${rows.length} of ${collected.length} collected`
-      : `${collected.length} collected`;
+      ? t("review.countFiltered", { shown: rows.length, total: collected.length })
+      : t("review.count", { n: collected.length });
   if (rows.length) {
     grid.replaceChildren(...rows.map(cell));
   } else {
     const empty = document.createElement("div");
     empty.className = "empty";
-    empty.textContent = collected.length ? "No matches." : "Nothing collected.";
+    empty.textContent = collected.length ? t("review.noMatches") : t("review.nothingCollected");
     grid.replaceChildren(empty);
   }
   updateBlockBtn();
@@ -295,21 +300,25 @@ function doBlock(): void {
   // this X tab is open), so closing would make it look like nothing happened.
   blocking = true;
   updateBlockBtn();
-  if (statusEl) statusEl.textContent = `Blocking 0/${handles.length}…`;
+  if (statusEl) statusEl.textContent = t("review.statusBlocking", { done: 0, total: handles.length });
 
   onBlock(handles, (p) => {
     if (!statusEl) return;
     if (p.phase === "blocking" || p.phase === "paused" || p.phase === "waiting") {
       statusEl.textContent =
         p.phase === "paused"
-          ? `Paused${p.error ? ` (${p.error})` : ""} — ${p.done}/${p.total}`
+          ? t("review.statusPaused", {
+              err: p.error ? t("review.errSuffix", { err: p.error }) : "",
+              done: p.done,
+              total: p.total,
+            })
           : p.phase === "waiting"
-            ? `${p.error ?? "Waiting"} — ${p.done}/${p.total}`
-            : `Blocking ${p.done}/${p.total}…`;
+            ? t("review.statusWaiting", { err: p.error ?? "", done: p.done, total: p.total })
+            : t("review.statusBlocking", { done: p.done, total: p.total });
       return;
     }
     blocking = false;
-    statusEl.textContent = `Done — blocked ${p.done}/${p.total}.`;
+    statusEl.textContent = t("review.statusDone", { done: p.done, total: p.total });
     updateBlockBtn();
   });
 }
@@ -323,7 +332,15 @@ export async function openReview(
   block: (handles: string[], onProgress: (p: BlockProgress) => void) => void,
 ): Promise<void> {
   onBlock = block;
+  setLang((await getConfig()).lang);
+  // Rebuild if the language changed since the overlay was last mounted — the
+  // static head labels are only set at mount time.
+  if (host && mountedLang !== getLang()) {
+    host.remove();
+    host = null;
+  }
   if (!host) mount();
+  if (backdrop) backdrop.dir = isRtl() ? "rtl" : "ltr";
   host!.style.display = "block";
   blocking = false;
   if (statusEl) statusEl.textContent = "";

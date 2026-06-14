@@ -2,6 +2,7 @@
 
 import {
   getCollected,
+  getConfig,
   addCollected,
   removeCollected,
   clearCollected,
@@ -10,6 +11,7 @@ import {
 import { langName, langOptions } from "./lang.ts";
 import { toCsv, parseCsv, downloadCsv, pickCsv } from "./csv.ts";
 import { watchNavCount } from "./nav.ts";
+import { applyI18n, setLang, t } from "./i18n.ts";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -48,7 +50,7 @@ function syncLangOptions(): void {
   const opts = langOptions(users);
   const current = langEl.value;
   langEl.replaceChildren(
-    new Option("All languages", ""),
+    new Option(t("common.allLanguages"), ""),
     ...opts.map((c) => new Option(langName(c), c)),
   );
   langEl.value = opts.includes(current) ? current : "";
@@ -85,14 +87,14 @@ function render(): void {
       if (u.blocking) {
         const badge = document.createElement("span");
         badge.className = "badge";
-        badge.textContent = "In progress";
+        badge.textContent = t("collected.inProgress");
         meta.append(badge);
       }
 
       const rm = document.createElement("button");
       rm.type = "button";
       rm.className = "remove";
-      rm.title = "Remove";
+      rm.title = t("common.remove");
       rm.textContent = "✕";
       rm.addEventListener("click", async () => {
         await removeCollected(u.handle);
@@ -106,12 +108,14 @@ function render(): void {
 
   emptyEl.hidden = rows.length > 0;
   pagerEl.hidden = rows.length <= PAGE_SIZE;
-  pageInfo.textContent = `Page ${page + 1} of ${pages}`;
+  pageInfo.textContent = t("common.pageInfo", { page: page + 1, pages });
   prevBtn.disabled = page === 0;
   nextBtn.disabled = page >= pages - 1;
 }
 
 async function load(): Promise<void> {
+  setLang((await getConfig()).lang);
+  applyI18n();
   users = await getCollected();
   countEl.textContent = String(users.length);
   syncLangOptions();
@@ -141,7 +145,7 @@ nextBtn.addEventListener("click", () => {
 
 clearBtn.addEventListener("click", async () => {
   if (!users.length) return;
-  if (!confirm("Clear the entire collected list? This can't be undone.")) {
+  if (!confirm(t("collected.confirmClear"))) {
     return;
   }
   await clearCollected();
@@ -173,7 +177,7 @@ importBtn.addEventListener("click", async () => {
   const iLang = col("lang");
 
   if (iHandle === -1) {
-    alert('Import failed: CSV needs a "handle" column.');
+    alert(t("collected.importNoHandle"));
     return;
   }
 
@@ -192,7 +196,7 @@ importBtn.addEventListener("click", async () => {
   }
 
   if (!imported.length) {
-    alert("Import failed: no rows with a handle found.");
+    alert(t("collected.importNoRows"));
     return;
   }
 

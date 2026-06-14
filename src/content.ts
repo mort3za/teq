@@ -6,6 +6,7 @@ import { matchReason } from "./matcher.ts";
 import { blockUser, BlockError } from "./blocker.ts";
 import { openReview, type BlockProgress } from "./review.ts";
 import { blockDelayMs, capReached, capRetryMs, fmtDuration } from "./pacing.ts";
+import { setLang, t } from "./i18n.ts";
 import {
   getConfig,
   DEFAULT_CONFIG,
@@ -134,7 +135,8 @@ async function collect(): Promise<number> {
 
     // Match the display name first; if it doesn't match, also check the
     // @username. Username matching is always on — there's no config for it.
-    const reason = matchReason(user.name, cfg) ?? matchReason(user.handle, cfg);
+    const opts = { words: cfg.words, normalize: cfg.persianNormalize };
+    const reason = matchReason(user.name, opts) ?? matchReason(user.handle, opts);
     if (!reason) continue;
 
     found.push({ handle: user.handle, name: user.name, reason, lang: tweetLang(el) });
@@ -200,17 +202,20 @@ const CAP_RECHECK_MS = 30_000;
 async function waitOutCap(): Promise<void> {
   while (!paused) {
     const cfg = await getConfig();
+    setLang(cfg.lang);
     const ts = (await getLog()).map((e) => e.at);
     const active = capReached(ts, cfg.maxPerHour, cfg.maxPerDay);
     if (!active) break; // the window freed a slot → resume blocking
     const waitMs = capRetryMs(ts, cfg.maxPerHour, cfg.maxPerDay);
     const limit =
-      active === "day" ? `Daily limit (${cfg.maxPerDay})` : `Hourly limit (${cfg.maxPerHour})`;
+      active === "day"
+        ? t("run.dailyLimit", { n: cfg.maxPerDay })
+        : t("run.hourlyLimit", { n: cfg.maxPerHour });
     await reportProgress({
       done: blockDone,
       total: blockTotal,
       phase: "waiting",
-      error: `${limit} reached — auto-resuming in ${fmtDuration(waitMs)}.`,
+      error: t("run.capReached", { limit, time: fmtDuration(waitMs) }),
       resumeAt: Date.now() + waitMs,
     });
     // +1s settle so we don't wake a hair before the boundary and loop once more.

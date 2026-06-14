@@ -1,6 +1,6 @@
 :root {
   color-scheme: light dark;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: "Vazirmatn", system-ui, -apple-system, sans-serif;
 }
 
 body {
@@ -85,7 +85,7 @@ header .switch-field {
   position: absolute;
   height: 16px;
   width: 16px;
-  left: 3px;
+  inset-inline-start: 3px;
   top: 3px;
   background: #fff;
   border-radius: 50%;
@@ -98,6 +98,10 @@ header .switch-field {
 
 .switch input:checked + .slider::before {
   transform: translateX(16px);
+}
+
+[dir="rtl"] .switch input:checked + .slider::before {
+  transform: translateX(-16px);
 }
 
 .run {
@@ -145,7 +149,7 @@ header .switch-field {
 }
 
 .progress #progressText {
-  margin-right: auto;
+  margin-inline-end: auto;
 }
 
 .progress .dot {
@@ -245,7 +249,7 @@ details {
 }
 
 #collectedCount {
-  margin-right: auto;
+  margin-inline-end: auto;
 }
 
 .link {

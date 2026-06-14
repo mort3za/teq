@@ -1,8 +1,9 @@
 // Full-page list of every blocked account: search, paginate, clear.
 
-import { getLog, clearLog, type LogEntry } from "./storage.ts";
+import { getLog, getConfig, clearLog, type LogEntry } from "./storage.ts";
 import { toCsv, downloadCsv } from "./csv.ts";
 import { watchNavCount } from "./nav.ts";
+import { applyI18n, setLang, t } from "./i18n.ts";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -81,12 +82,14 @@ function render(): void {
 
   emptyEl.hidden = rows.length > 0;
   pagerEl.hidden = rows.length <= PAGE_SIZE;
-  pageInfo.textContent = `Page ${page + 1} of ${pages}`;
+  pageInfo.textContent = t("common.pageInfo", { page: page + 1, pages });
   prevBtn.disabled = page === 0;
   nextBtn.disabled = page >= pages - 1;
 }
 
 async function load(): Promise<void> {
+  setLang((await getConfig()).lang);
+  applyI18n();
   entries = dedupe(await getLog());
   countEl.textContent = String(entries.length);
   page = 0;
@@ -110,7 +113,7 @@ nextBtn.addEventListener("click", () => {
 
 clearBtn.addEventListener("click", async () => {
   if (!entries.length) return;
-  if (!confirm("Clear the entire blocked-accounts list? This can't be undone.")) {
+  if (!confirm(t("blocks.confirmClear"))) {
     return;
   }
   await clearLog();

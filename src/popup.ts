@@ -14,6 +14,7 @@ import {
 } from "./storage.ts";
 import { parseWords } from "./matcher.ts";
 import { fmtDuration } from "./pacing.ts";
+import { applyI18n, setLang, t } from "./i18n.ts";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -35,6 +36,8 @@ const X_URL = /^https?:\/\/(x|twitter)\.com\//;
 
 async function load(): Promise<void> {
   const cfg = await getConfig();
+  setLang(cfg.lang);
+  applyI18n();
   words.value = cfg.words.join("\n");
   autoCollect.checked = cfg.autoCollect;
 
@@ -65,7 +68,7 @@ let shownProgress: BlockProgress | null = null;
 
 /** " (resumes in 12m)" countdown for a waiting run, or "" if no resume time. */
 function waitingSuffix(p: BlockProgress): string {
-  return p.resumeAt ? ` (resumes in ${fmtDuration(p.resumeAt - Date.now())})` : "";
+  return p.resumeAt ? t("popup.resumesIn", { time: fmtDuration(p.resumeAt - Date.now()) }) : "";
 }
 
 /** Paint the progress row from a progress snapshot — used both by the live
@@ -79,15 +82,15 @@ function applyProgress(p: BlockProgress | null): void {
   const isPaused = p!.phase === "paused";
   const isWaiting = p!.phase === "waiting";
   progressText.textContent = isPaused
-    ? `Paused — ${p!.done} of ${p!.total}`
+    ? t("popup.progress.paused", { done: p!.done, total: p!.total })
     : isWaiting
-      ? `Waiting${waitingSuffix(p!)} — ${p!.done} of ${p!.total}`
-      : `Blocking ${p!.done} of ${p!.total}…`;
+      ? t("popup.progress.waiting", { suffix: waitingSuffix(p!), done: p!.done, total: p!.total })
+      : t("popup.progress.blocking", { done: p!.done, total: p!.total });
   // Both non-blocking states get the muted/idle styling; only a manual pause
   // shows the ▶ resume affordance — a waiting run resumes itself.
   progress.classList.toggle("paused", isPaused || isWaiting);
   pauseToggle.textContent = isPaused ? "▶" : "⏸";
-  pauseToggle.setAttribute("aria-label", isPaused ? "Resume" : "Pause");
+  pauseToggle.setAttribute("aria-label", isPaused ? t("popup.aria.resume") : t("popup.aria.pause"));
 }
 
 /** Find an open x.com / twitter.com tab (host permissions grant the URL match). */
@@ -115,13 +118,13 @@ pauseToggle.addEventListener("click", () => {
 async function sendToggle(pausing: boolean): Promise<void> {
   const tab = await xTab();
   if (!tab?.id) {
-    runStatus.textContent = "Open the X tab to control the run.";
+    runStatus.textContent = t("popup.openXControl");
     return;
   }
   try {
     await chrome.tabs.sendMessage(tab.id, { type: pausing ? "pauseBlocking" : "resumeBlocking" });
   } catch {
-    runStatus.textContent = "Reload the X tab, then try again.";
+    runStatus.textContent = t("popup.reloadX");
   }
 }
 
@@ -147,7 +150,7 @@ function row(u: CollectedUser): HTMLLIElement {
 
 async function renderCollected(): Promise<void> {
   const collected = [...(await getCollected())].reverse();
-  collectedCount.textContent = `${collected.length} collected`;
+  collectedCount.textContent = t("popup.collectedCount", { n: collected.length });
   collectedEmpty.hidden = collected.length > 0;
   clearCollectedBtn.hidden = collected.length === 0;
   reviewBtn.disabled = collected.length === 0;
@@ -164,7 +167,7 @@ autoCollect.addEventListener("change", () => void save());
 async function activeXTab(): Promise<chrome.tabs.Tab | null> {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id || !X_URL.test(tab.url ?? "")) {
-    runStatus.textContent = "Open an x.com tab first.";
+    runStatus.textContent = t("popup.openXFirst");
     return null;
   }
   return tab;
@@ -178,7 +181,7 @@ async function review(): Promise<void> {
     await chrome.tabs.sendMessage(tab.id!, { type: "review" });
     window.close(); // hand off to the full-page overlay
   } catch {
-    runStatus.textContent = "Reload the X tab, then try again.";
+    runStatus.textContent = t("popup.reloadX");
   }
 }
 

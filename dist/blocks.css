@@ -1,6 +1,6 @@
 :root {
   color-scheme: light dark;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: "Vazirmatn", system-ui, -apple-system, sans-serif;
   --accent: #1d9bf0;
   --border: #8884;
   --muted: #888;
@@ -21,14 +21,15 @@ body {
 .sidebar {
   flex: 0 0 200px;
   padding: 24px 16px;
-  border-right: 1px solid var(--border);
+  border-inline-end: 1px solid var(--border);
   display: flex;
   flex-direction: column;
 }
 
 .brand {
   font-size: 16px;
-  margin: 0 0 20px 8px;
+  margin: 0 0 20px;
+  margin-inline-start: 8px;
   color: var(--accent);
 }
 
@@ -357,7 +358,7 @@ h1 {
   position: absolute;
   height: 16px;
   width: 16px;
-  left: 3px;
+  inset-inline-start: 3px;
   top: 3px;
   background: #fff;
   border-radius: 50%;
@@ -370,6 +371,10 @@ h1 {
 
 .switch input:checked + .slider::before {
   transform: translateX(16px);
+}
+
+[dir="rtl"] .switch input:checked + .slider::before {
+  transform: translateX(-16px);
 }
 
 .hint {

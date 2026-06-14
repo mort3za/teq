@@ -1,5 +1,7 @@
 # teq
 
+**English** · [فارسی](README.fa.md)
+
 A Chrome extension that finds X.com (Twitter) accounts by **name or @handle** and blocks them for you — safely, in the background, while you browse.
 
 You write a few rules (words or emoji). As you scroll X, teq quietly collects everyone whose display name or handle matches. When you're ready, you review the list and block them in one click. teq then blocks them one at a time, slowly enough that X never sees a bot.
@@ -59,6 +61,10 @@ Edit your rules and the auto-collect toggle right in the popup. The full set liv
 | **Pacing**        | Base seconds between blocks (+ up to 30% jitter)           | 30      |
 | **Max per hour**  | Cap on blocks in any rolling 60 min (`0` = no limit)       | 40      |
 | **Max per day**   | Cap on blocks in any rolling 24 h (`0` = no limit)         | 250     |
+| **Language**      | Interface language — English or Persian (فارسی), switchable live | auto¹   |
+| **Persian/Arabic matching** | Fold Arabic ي/ك ↔ Persian ی/ک and Arabic-Indic ↔ Persian digits when matching | off |
+
+¹ Defaults to Persian if your browser's UI language is Persian, otherwise English.
 
 Rules sync across your Chrome profile. Your collected list and block log stay on this device (the log keeps the last 500 entries). On the Options page you can **export/import** your config as JSON — handy for backup or sharing rules.
 

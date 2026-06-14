@@ -5,11 +5,14 @@
 import { getConfig, setConfig, DEFAULT_CONFIG, type Config } from "./storage.ts";
 import { parseWords } from "./matcher.ts";
 import { watchNavCount } from "./nav.ts";
+import { applyI18n, setLang, t, type Lang } from "./i18n.ts";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
 const wordsEl = $<HTMLTextAreaElement>("words");
 const autoCollect = $<HTMLInputElement>("autoCollect");
+const langEl = $<HTMLSelectElement>("lang");
+const persianNormalize = $<HTMLInputElement>("persianNormalize");
 const scan = $<HTMLInputElement>("scan");
 const pacing = $<HTMLInputElement>("pacing");
 const maxPerHour = $<HTMLInputElement>("maxPerHour");
@@ -26,6 +29,10 @@ function note(msg: string): void {
 
 async function load(): Promise<void> {
   const cfg = await getConfig();
+  setLang(cfg.lang);
+  applyI18n();
+  langEl.value = cfg.lang;
+  persianNormalize.checked = cfg.persianNormalize;
   wordsEl.value = cfg.words.join("\n");
   autoCollect.checked = cfg.autoCollect;
   scan.value = String(cfg.scanSeconds);
@@ -62,14 +69,25 @@ async function save(): Promise<void> {
   await setConfig({
     words: parseWords(wordsEl.value),
     autoCollect: autoCollect.checked,
+    persianNormalize: persianNormalize.checked,
     scanSeconds,
     pacingSeconds,
     maxPerHour: perHour,
     maxPerDay: perDay,
   });
-  note("Saved.");
+  note(t("options.saved"));
 }
 
+/** Switch the interface language live and persist it. */
+async function changeLang(): Promise<void> {
+  const lang = (langEl.value === "fa" ? "fa" : "en") as Lang;
+  await setConfig({ lang });
+  setLang(lang);
+  applyI18n();
+}
+
+langEl.addEventListener("change", () => void changeLang());
+persianNormalize.addEventListener("change", () => void save());
 wordsEl.addEventListener("input", () => void save());
 autoCollect.addEventListener("change", () => void save());
 scan.addEventListener("change", () => void save());
@@ -109,7 +127,7 @@ importBtn.addEventListener("click", () => {
     try {
       data = JSON.parse(await file.text());
     } catch {
-      note("Import failed: invalid JSON.");
+      note(t("options.importInvalid"));
       return;
     }
 
@@ -119,6 +137,12 @@ importBtn.addEventListener("click", () => {
     }
     if (typeof data.autoCollect === "boolean") {
       patch.autoCollect = data.autoCollect;
+    }
+    if (typeof data.persianNormalize === "boolean") {
+      patch.persianNormalize = data.persianNormalize;
+    }
+    if (data.lang === "en" || data.lang === "fa") {
+      patch.lang = data.lang;
     }
     if (Number.isFinite(data.scanSeconds)) {
       patch.scanSeconds = Math.max(1, Math.round(data.scanSeconds as number));
@@ -134,13 +158,13 @@ importBtn.addEventListener("click", () => {
     }
 
     if (!Object.keys(patch).length) {
-      note("Import failed: no recognized settings.");
+      note(t("options.importNoSettings"));
       return;
     }
 
     await setConfig(patch);
     await load();
-    note("Imported.");
+    note(t("options.imported"));
   });
   input.click();
 });

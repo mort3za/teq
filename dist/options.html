@@ -3,6 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap" />
     <link rel="stylesheet" href="blocks.css" />
     <title>Options — Teq</title>
   </head>
@@ -11,9 +14,9 @@
       <aside class="sidebar">
         <h2 class="brand">Teq</h2>
         <nav>
-          <a class="nav-link" href="blocks.html">Blocked <span class="nav-count" id="navCountBlocked"></span></a>
-          <a class="nav-link" href="collected.html">Collected <span class="nav-count" id="navCount"></span></a>
-          <a class="nav-link" aria-current="page" href="options.html">Options</a>
+          <a class="nav-link" href="blocks.html"><span data-i18n="nav.blocked">Blocked</span> <span class="nav-count" id="navCountBlocked"></span></a>
+          <a class="nav-link" href="collected.html"><span data-i18n="nav.collected">Collected</span> <span class="nav-count" id="navCount"></span></a>
+          <a class="nav-link" aria-current="page" href="options.html" data-i18n="nav.options">Options</a>
         </nav>
         <a class="repo-link" href="https://github.com/mort3za/teq" target="_blank" rel="noopener noreferrer">
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
@@ -23,39 +26,62 @@
       <main>
         <header>
           <div>
-            <h1>Options</h1>
-            <p class="count">Blocking behaviour</p>
+            <h1 data-i18n="options.title">Options</h1>
+            <p class="count" data-i18n="options.subtitle">Blocking behaviour</p>
           </div>
           <div class="actions">
-            <button id="import" type="button" class="action">Import JSON</button>
-            <button id="export" type="button" class="action">Export JSON</button>
+            <button id="import" type="button" class="action" data-i18n="options.importJson">Import JSON</button>
+            <button id="export" type="button" class="action" data-i18n="options.exportJson">Export JSON</button>
           </div>
         </header>
 
         <div class="field">
-          <label class="switch-field" title="Auto-collect matches as you browse X">
+          <label for="lang" data-i18n="options.language">Language</label>
+          <select id="lang">
+            <option value="en">English</option>
+            <option value="fa">فارسی</option>
+          </select>
+          <p class="hint" data-i18n="options.languageHint">Language of this extension's interface.</p>
+        </div>
+
+        <div class="field">
+          <label class="switch-field" data-i18n-title="popup.autoCollectTitle" title="Auto-collect matches as you browse X">
             <span class="switch">
               <input id="autoCollect" type="checkbox" />
               <span class="slider"></span>
             </span>
-            <span>Auto-collect matches as you browse</span>
+            <span data-i18n="options.autoCollectLabel">Auto-collect matches as you browse</span>
           </label>
-          <p class="hint">
+          <p class="hint" data-i18n="options.autoCollectHint">
             When on, the content script scans X for matches automatically. Turn it off to pause collecting without
             losing your rules.
           </p>
         </div>
 
         <div class="field">
-          <label for="words">Words / emoji to match (one per line)</label>
+          <label for="words" data-i18n="common.wordsLabel">Words / emoji to match (one per line)</label>
           <textarea id="words" rows="8" placeholder="crypto&#10;airdrop&#10;🚀"></textarea>
-          <p class="hint">A display name or @handle containing any of these (case-insensitive) is collected.</p>
+          <p class="hint" data-i18n="options.wordsHint">A display name or @handle containing any of these (case-insensitive) is collected.</p>
+        </div>
+
+        <div class="field">
+          <label class="switch-field">
+            <span class="switch">
+              <input id="persianNormalize" type="checkbox" />
+              <span class="slider"></span>
+            </span>
+            <span data-i18n="options.persianNormalize">Match Persian / Arabic letter and digit variants</span>
+          </label>
+          <p class="hint" data-i18n="options.persianNormalizeHint">
+            Treats Arabic ي/ك and Persian ی/ک — and Arabic-Indic vs. Persian digits — as the same when matching. Off by
+            default; turn it on for Persian/Arabic rules.
+          </p>
         </div>
 
         <details class="advanced">
-          <summary>Advanced</summary>
+          <summary data-i18n="options.advanced">Advanced</summary>
 
-          <p class="warning">
+          <p class="warning" data-i18n="options.warning">
             ⚠️ These pacing and rate limits are tuned to keep blocking under X's automation radar. Raising them — or
             blocking faster than the recommended ranges — makes your activity look automated, which can get your X
             account rate-limited, temporarily locked, or permanently suspended. Only change these if you understand
@@ -63,41 +89,41 @@
           </p>
 
           <div class="field">
-            <label for="scan">Seconds between scans</label>
+            <label for="scan" data-i18n="options.scanLabel">Seconds between scans</label>
             <input id="scan" type="number" min="1" step="1" />
-            <p class="hint">How often the page is automatically scanned for new matches while auto-collect is on.</p>
+            <p class="hint" data-i18n="options.scanHint">How often the page is automatically scanned for new matches while auto-collect is on.</p>
           </div>
 
           <div class="field">
-            <label for="pacing">Seconds between blocks</label>
+            <label for="pacing" data-i18n="options.pacingLabel">Seconds between blocks</label>
             <input id="pacing" type="number" min="1" step="1" />
-            <p class="hint">
+            <p class="hint" data-i18n="options.pacingHint">
               Each block waits this long (plus a little random jitter) before the next. X flags rapid-fire blocking as
               automation — 30s or more is recommended.
             </p>
           </div>
 
           <div class="field">
-            <label for="maxPerHour">Max blocks per hour</label>
+            <label for="maxPerHour" data-i18n="options.maxPerHourLabel">Max blocks per hour</label>
             <input id="maxPerHour" type="number" min="0" step="1" />
-            <p class="hint">
+            <p class="hint" data-i18n="options.maxPerHourHint">
               The run pauses once this many blocks happen within any rolling 60-minute window. Safe range is ~30–50; 0
               disables the limit.
             </p>
           </div>
 
           <div class="field">
-            <label for="maxPerDay">Max blocks per day</label>
+            <label for="maxPerDay" data-i18n="options.maxPerDayLabel">Max blocks per day</label>
             <input id="maxPerDay" type="number" min="0" step="1" />
-            <p class="hint">
+            <p class="hint" data-i18n="options.maxPerDayHint">
               The run pauses once this many blocks happen within any rolling 24-hour window. Safe range is ~200–300;
               approaching it can trigger a 24h cooling-off on X. 0 disables the limit.
             </p>
           </div>
 
           <div class="field">
-            <button id="resetAdvanced" type="button" class="action">Reset to defaults</button>
-            <p class="hint">Restore the recommended scan, pacing, and rate-limit values above.</p>
+            <button id="resetAdvanced" type="button" class="action" data-i18n="options.reset">Reset to defaults</button>
+            <p class="hint" data-i18n="options.resetHint">Restore the recommended scan, pacing, and rate-limit values above.</p>
           </div>
         </details>
         <p id="status" class="saved"></p>
