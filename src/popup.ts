@@ -150,7 +150,7 @@ function row(u: CollectedUser): HTMLLIElement {
 
 async function renderCollected(): Promise<void> {
   const collected = [...(await getCollected())].reverse();
-  collectedCount.textContent = t("popup.collectedCount", { n: collected.length });
+  collectedCount.textContent = String(collected.length);
   collectedEmpty.hidden = collected.length > 0;
   clearCollectedBtn.hidden = collected.length === 0;
   reviewBtn.disabled = collected.length === 0;

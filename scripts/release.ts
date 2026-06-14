@@ -63,7 +63,7 @@ for (const file of VERSION_FILES) {
 console.log(`Releasing ${tag} (from branch ${branch}) …`);
 await $`git add ${VERSION_FILES}`;
 await $`git commit -m ${`release: ${tag}`}`;
-await $`git tag ${tag}`;
+await $`git tag -a ${tag} -m ${`release: ${tag}`}`;
 await $`git push origin ${branch}`;
 await $`git push origin ${tag}`;
 console.log(`Pushed ${tag}. CI will build & publish the release.`);

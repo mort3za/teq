@@ -35,8 +35,10 @@
 
     <section class="collected">
       <div class="collected-head">
-        <span id="collectedCount">0 collected</span>
-        <a id="viewCollected" class="link" href="collected.html" target="_blank" rel="noreferrer" data-i18n="popup.viewAll">View all →</a>
+        <span class="collected-count">
+          <strong id="collectedCount">0</strong>
+          <a id="viewCollected" class="link" href="collected.html" target="_blank" rel="noreferrer" data-i18n="popup.collected">collected</a>
+        </span>
         <button id="clearCollected" type="button" class="link" hidden data-i18n="common.clear">Clear</button>
       </div>
       <ul id="collectedList" class="collected-list"></ul>
@@ -46,8 +48,15 @@
     </section>
 
     <div class="stats">
-      <strong id="count">0</strong> <span data-i18n="popup.blockedTotal">blocked total</span>
-      <a id="viewAll" href="blocks.html" target="_blank" rel="noreferrer" data-i18n="popup.recentBlocks">Recent blocks →</a>
+      <span class="stats-total">
+        <strong id="count">0</strong>
+        <a id="viewAll" href="blocks.html" target="_blank" rel="noreferrer" data-i18n="popup.blocked">blocked</a>
+        <span data-i18n="common.total">total</span>
+      </span>
+      <a id="openOptions" class="settings-link" href="options.html" target="_blank" rel="noreferrer">
+        <span class="cog" aria-hidden="true">⚙</span>
+        <span data-i18n="popup.openOptions">Settings</span>
+      </a>
     </div>
 
     <p class="note" data-i18n="popup.note">

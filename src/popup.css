@@ -196,6 +196,18 @@ header .switch-field {
 
 .stats {
   margin: 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.settings-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #1d9bf0;
+  text-decoration: none;
 }
 
 .error {
@@ -248,7 +260,7 @@ details {
   margin-bottom: 6px;
 }
 
-#collectedCount {
+.collected-count {
   margin-inline-end: auto;
 }
 
@@ -340,5 +352,5 @@ details {
   color: #888;
   font-size: 11px;
   line-height: 1.4;
-  margin-top: 12px;
+  margin-top: 0;
 }
