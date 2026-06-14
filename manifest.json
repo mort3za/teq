@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "tw-teq",
+  "name": "teq",
   "version": "1.0.3",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnLm5qNnCx7gGNcx2zFx02dPZw9tnQF37AyXf2Goxboa1DgBI3OkE6lE987Kq9e6sVNqDI0QRmaKf95Xb5lGZNDIjfW65xAdSxYK6Q9p7RCP+kbwKRickfk7KwCWK43sAM4tghAMIOv4GtTmMkYnBUCMXt5fce2U6NQDnPsI2v3KrJQykGHQu1C0aECYT8wEfqDGi7GATx+1YaK4rqNowHq9JUEIyd4+NOOJNUZCz7XKx6OZxEMLqPRutBYsW7/mysTf+neQGEvgKJIfAO9bHSDg5LcdqdAqghnLpq7dv++T20l2NZn3kG2heU3sK+sBrvDa+kxUbh1X1YQ0xdU21sQIDAQAB",
   "description": "Collect X.com users whose display name matches your word/emoji rules, then block.",
   "permissions": [
     "storage"

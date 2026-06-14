@@ -34,3 +34,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # build output (built in CI, attached to Releases)
 dist
+
+# extension signing key — keep secret; the public half lives in manifest.json "key"
+key.pem
