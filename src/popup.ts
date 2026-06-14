@@ -13,6 +13,7 @@ import {
   type BlockProgress,
 } from "./storage.ts";
 import { parseWords } from "./matcher.ts";
+import { fmtDuration } from "./pacing.ts";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -62,18 +63,29 @@ async function renderProgress(): Promise<void> {
 // the visual response, the bug being fixed here).
 let shownProgress: BlockProgress | null = null;
 
+/** " (resumes in 12m)" countdown for a waiting run, or "" if no resume time. */
+function waitingSuffix(p: BlockProgress): string {
+  return p.resumeAt ? ` (resumes in ${fmtDuration(p.resumeAt - Date.now())})` : "";
+}
+
 /** Paint the progress row from a progress snapshot — used both by the live
  * storage-driven render and by the optimistic flip on the toggle click. */
 function applyProgress(p: BlockProgress | null): void {
   shownProgress = p;
-  const active = p?.phase === "blocking" || p?.phase === "paused";
+  const active =
+    p?.phase === "blocking" || p?.phase === "paused" || p?.phase === "waiting";
   progress.hidden = !active;
   if (!active) return;
   const isPaused = p!.phase === "paused";
+  const isWaiting = p!.phase === "waiting";
   progressText.textContent = isPaused
     ? `Paused — ${p!.done} of ${p!.total}`
-    : `Blocking ${p!.done} of ${p!.total}…`;
-  progress.classList.toggle("paused", isPaused);
+    : isWaiting
+      ? `Waiting${waitingSuffix(p!)} — ${p!.done} of ${p!.total}`
+      : `Blocking ${p!.done} of ${p!.total}…`;
+  // Both non-blocking states get the muted/idle styling; only a manual pause
+  // shows the ▶ resume affordance — a waiting run resumes itself.
+  progress.classList.toggle("paused", isPaused || isWaiting);
   pauseToggle.textContent = isPaused ? "▶" : "⏸";
   pauseToggle.setAttribute("aria-label", isPaused ? "Resume" : "Pause");
 }
@@ -86,7 +98,9 @@ async function xTab(): Promise<chrome.tabs.Tab | null> {
 
 pauseToggle.addEventListener("click", () => {
   const p = shownProgress;
-  if (p?.phase !== "blocking" && p?.phase !== "paused") return;
+  if (p?.phase !== "blocking" && p?.phase !== "paused" && p?.phase !== "waiting") return;
+  // From blocking or a cap-cooldown wait → manual pause (stops auto-resume);
+  // from paused → resume.
   const pausing = p.phase !== "paused";
   // Flip the row right now (synchronously, before any await) so the toggle
   // reacts to the click. The content script's next progress write reconciles

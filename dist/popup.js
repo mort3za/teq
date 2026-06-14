@@ -121,6 +121,51 @@
 `).map((line) => line.trim()).filter((line) => line.length > 0);
   }
 
+  // src/pacing.ts
+  var PACING_JITTER = 0.3;
+  function blockDelayMs(pacingSeconds, rand = Math.random()) {
+    const base = pacingSeconds * 1000;
+    return base + rand * base * PACING_JITTER;
+  }
+  var HOUR_MS = 60 * 60 * 1000;
+  var DAY_MS = 24 * HOUR_MS;
+  function capReached(timestamps, maxPerHour, maxPerDay, now = Date.now()) {
+    let inHour = 0;
+    let inDay = 0;
+    for (const t of timestamps) {
+      if (now - t < DAY_MS) {
+        inDay++;
+        if (now - t < HOUR_MS)
+          inHour++;
+      }
+    }
+    if (maxPerDay > 0 && inDay >= maxPerDay)
+      return "day";
+    if (maxPerHour > 0 && inHour >= maxPerHour)
+      return "hour";
+    return null;
+  }
+  function capRetryMs(timestamps, maxPerHour, maxPerDay, now = Date.now()) {
+    const cap = capReached(timestamps, maxPerHour, maxPerDay, now);
+    if (!cap)
+      return 0;
+    const windowMs = cap === "day" ? DAY_MS : HOUR_MS;
+    const max = cap === "day" ? maxPerDay : maxPerHour;
+    const inWindow = timestamps.filter((t) => now - t < windowMs).sort((a, b) => a - b);
+    const pivot = inWindow[inWindow.length - max];
+    return pivot + windowMs - now;
+  }
+  function fmtDuration(ms) {
+    const s = Math.max(0, Math.round(ms / 1000));
+    if (s < 60)
+      return `${s}s`;
+    const m = Math.floor(s / 60);
+    if (m < 60)
+      return `${m}m`;
+    const h = Math.floor(m / 60);
+    return `${h}h ${m % 60}m`;
+  }
+
   // src/popup.ts
   var $ = (id) => document.getElementById(id);
   var words = $("words");
@@ -155,15 +200,19 @@
     applyProgress(await getBlockProgress());
   }
   var shownProgress = null;
+  function waitingSuffix(p) {
+    return p.resumeAt ? ` (resumes in ${fmtDuration(p.resumeAt - Date.now())})` : "";
+  }
   function applyProgress(p) {
     shownProgress = p;
-    const active = p?.phase === "blocking" || p?.phase === "paused";
+    const active = p?.phase === "blocking" || p?.phase === "paused" || p?.phase === "waiting";
     progress.hidden = !active;
     if (!active)
       return;
     const isPaused = p.phase === "paused";
-    progressText.textContent = isPaused ? `Paused — ${p.done} of ${p.total}` : `Blocking ${p.done} of ${p.total}…`;
-    progress.classList.toggle("paused", isPaused);
+    const isWaiting = p.phase === "waiting";
+    progressText.textContent = isPaused ? `Paused — ${p.done} of ${p.total}` : isWaiting ? `Waiting${waitingSuffix(p)} — ${p.done} of ${p.total}` : `Blocking ${p.done} of ${p.total}…`;
+    progress.classList.toggle("paused", isPaused || isWaiting);
     pauseToggle.textContent = isPaused ? "▶" : "⏸";
     pauseToggle.setAttribute("aria-label", isPaused ? "Resume" : "Pause");
   }
@@ -173,7 +222,7 @@
   }
   pauseToggle.addEventListener("click", () => {
     const p = shownProgress;
-    if (p?.phase !== "blocking" && p?.phase !== "paused")
+    if (p?.phase !== "blocking" && p?.phase !== "paused" && p?.phase !== "waiting")
       return;
     const pausing = p.phase !== "paused";
     applyProgress({ ...p, phase: pausing ? "paused" : "blocking" });

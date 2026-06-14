@@ -443,8 +443,8 @@
     onBlock(handles, (p) => {
       if (!statusEl)
         return;
-      if (p.phase === "blocking" || p.phase === "paused") {
-        statusEl.textContent = p.phase === "paused" ? `Paused${p.error ? ` (${p.error})` : ""} — ${p.done}/${p.total}` : `Blocking ${p.done}/${p.total}…`;
+      if (p.phase === "blocking" || p.phase === "paused" || p.phase === "waiting") {
+        statusEl.textContent = p.phase === "paused" ? `Paused${p.error ? ` (${p.error})` : ""} — ${p.done}/${p.total}` : p.phase === "waiting" ? `${p.error ?? "Waiting"} — ${p.done}/${p.total}` : `Blocking ${p.done}/${p.total}…`;
         return;
       }
       blocking = false;
@@ -495,6 +495,26 @@
     if (maxPerHour > 0 && inHour >= maxPerHour)
       return "hour";
     return null;
+  }
+  function capRetryMs(timestamps, maxPerHour, maxPerDay, now = Date.now()) {
+    const cap = capReached(timestamps, maxPerHour, maxPerDay, now);
+    if (!cap)
+      return 0;
+    const windowMs = cap === "day" ? DAY_MS : HOUR_MS;
+    const max = cap === "day" ? maxPerDay : maxPerHour;
+    const inWindow = timestamps.filter((t) => now - t < windowMs).sort((a, b) => a - b);
+    const pivot = inWindow[inWindow.length - max];
+    return pivot + windowMs - now;
+  }
+  function fmtDuration(ms) {
+    const s = Math.max(0, Math.round(ms / 1000));
+    if (s < 60)
+      return `${s}s`;
+    const m = Math.floor(s / 60);
+    if (m < 60)
+      return `${m}m`;
+    const h = Math.floor(m / 60);
+    return `${h}h ${m % 60}m`;
   }
 
   // src/content.ts
@@ -605,6 +625,30 @@
     setLastError(null);
     reportProgress({ done: blockDone, total: blockTotal, phase: "blocking" });
   }
+  var CAP_RECHECK_MS = 30000;
+  async function waitOutCap() {
+    while (!paused) {
+      const cfg = await getConfig();
+      const ts = (await getLog()).map((e) => e.at);
+      const active = capReached(ts, cfg.maxPerHour, cfg.maxPerDay);
+      if (!active)
+        break;
+      const waitMs = capRetryMs(ts, cfg.maxPerHour, cfg.maxPerDay);
+      const limit = active === "day" ? `Daily limit (${cfg.maxPerDay})` : `Hourly limit (${cfg.maxPerHour})`;
+      await reportProgress({
+        done: blockDone,
+        total: blockTotal,
+        phase: "waiting",
+        error: `${limit} reached — auto-resuming in ${fmtDuration(waitMs)}.`,
+        resumeAt: Date.now() + waitMs
+      });
+      await sleep(Math.min(waitMs + 1000, CAP_RECHECK_MS));
+    }
+    if (!paused) {
+      await setLastError(null);
+      await reportProgress({ done: blockDone, total: blockTotal, phase: "blocking" });
+    }
+  }
   async function drain() {
     draining = true;
     runPort = chrome.runtime.connect({ name: "block-run" });
@@ -614,9 +658,7 @@
       const cfg = await getConfig();
       const cap = capReached((await getLog()).map((e) => e.at), cfg.maxPerHour, cfg.maxPerDay);
       if (cap) {
-        const msg = cap === "day" ? `Daily limit reached (${cfg.maxPerDay} blocks) — resume after a 24h break.` : `Hourly limit reached (${cfg.maxPerHour} blocks) — resume after a break.`;
-        await setLastError(msg);
-        pauseRun(msg);
+        await waitOutCap();
         continue;
       }
       const handle = blockQueue[0];
@@ -666,7 +708,7 @@
     if (draining)
       return;
     const p = await getBlockProgress();
-    if (p?.phase !== "blocking" && p?.phase !== "paused")
+    if (p?.phase !== "blocking" && p?.phase !== "paused" && p?.phase !== "waiting")
       return;
     const queue = await getBlockQueue();
     if (!queue.length) {

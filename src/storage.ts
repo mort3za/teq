@@ -51,10 +51,13 @@ export interface BlockProgress {
   done: number;
   /** Users queued when the run started. */
   total: number;
-  phase: "blocking" | "paused" | "done";
+  phase: "blocking" | "paused" | "waiting" | "done";
   /** Why the run is paused, when X paused it (rate-limited / auth-rejected)
    * rather than the user. */
   error?: string;
+  /** Epoch-ms the run will auto-resume at, while `phase` is "waiting" (a rolling
+   * hourly/daily cap is cooling down). */
+  resumeAt?: number;
 }
 
 export interface LogEntry {

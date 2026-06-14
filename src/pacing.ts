@@ -43,3 +43,38 @@ export function capReached(
   if (maxPerHour > 0 && inHour >= maxPerHour) return "hour";
   return null;
 }
+
+/**
+ * Milliseconds to wait until `capReached` clears for the same inputs — i.e. how
+ * long until the next block is allowed. Returns 0 when no cap is currently hit.
+ * The wait is until enough of the oldest in-window blocks age out past the
+ * trailing hour/day boundary to free one slot: the run can then auto-resume
+ * instead of stopping for good. `now` is injectable for tests.
+ */
+export function capRetryMs(
+  timestamps: number[],
+  maxPerHour: number,
+  maxPerDay: number,
+  now: number = Date.now(),
+): number {
+  const cap = capReached(timestamps, maxPerHour, maxPerDay, now);
+  if (!cap) return 0;
+  const windowMs = cap === "day" ? DAY_MS : HOUR_MS;
+  const max = cap === "day" ? maxPerDay : maxPerHour;
+  // In-window blocks, oldest first. To drop the count to max - 1 (one free
+  // slot), the oldest (count - max + 1) must leave the window; the newest of
+  // those leaves last, so wait until it crosses the boundary.
+  const inWindow = timestamps.filter((t) => now - t < windowMs).sort((a, b) => a - b);
+  const pivot = inWindow[inWindow.length - max]!;
+  return pivot + windowMs - now;
+}
+
+/** Compact human duration for the auto-resume countdown: "45s", "12m", "2h 5m". */
+export function fmtDuration(ms: number): string {
+  const s = Math.max(0, Math.round(ms / 1000));
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  return `${h}h ${m % 60}m`;
+}

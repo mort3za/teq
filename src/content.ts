@@ -5,7 +5,7 @@
 import { matchReason } from "./matcher.ts";
 import { blockUser, BlockError } from "./blocker.ts";
 import { openReview, type BlockProgress } from "./review.ts";
-import { blockDelayMs, capReached } from "./pacing.ts";
+import { blockDelayMs, capReached, capRetryMs, fmtDuration } from "./pacing.ts";
 import {
   getConfig,
   DEFAULT_CONFIG,
@@ -183,6 +183,47 @@ function resumeRun(): void {
   void reportProgress({ done: blockDone, total: blockTotal, phase: "blocking" });
 }
 
+// How often the cap cooldown re-checks the rolling window. We compute the exact
+// clear time and sleep until then, but never longer than this in one go, so a
+// user pause (or a config change) is honored without a tight poll. Coarse on
+// purpose: the window clears on the scale of minutes/hours, not milliseconds.
+const CAP_RECHECK_MS = 30_000;
+
+/**
+ * Block while a maxed-out rolling cap cools down, then return so the drain loop
+ * takes the next target. The wait is recomputed from the live block log each
+ * pass, so it adapts to new blocks / config changes and survives a tab reload or
+ * browser restart — resumeInterruptedRun re-enters the drain loop, which calls
+ * back here and recomputes from the persisted log. Returns early if the user
+ * pauses; the drain loop's wait-while-paused gate then takes over.
+ */
+async function waitOutCap(): Promise<void> {
+  while (!paused) {
+    const cfg = await getConfig();
+    const ts = (await getLog()).map((e) => e.at);
+    const active = capReached(ts, cfg.maxPerHour, cfg.maxPerDay);
+    if (!active) break; // the window freed a slot → resume blocking
+    const waitMs = capRetryMs(ts, cfg.maxPerHour, cfg.maxPerDay);
+    const limit =
+      active === "day" ? `Daily limit (${cfg.maxPerDay})` : `Hourly limit (${cfg.maxPerHour})`;
+    await reportProgress({
+      done: blockDone,
+      total: blockTotal,
+      phase: "waiting",
+      error: `${limit} reached — auto-resuming in ${fmtDuration(waitMs)}.`,
+      resumeAt: Date.now() + waitMs,
+    });
+    // +1s settle so we don't wake a hair before the boundary and loop once more.
+    await sleep(Math.min(waitMs + 1000, CAP_RECHECK_MS));
+  }
+  // Cleared (not paused): drop any stale reason and show blocking again before
+  // the drain loop takes the next target.
+  if (!paused) {
+    await setLastError(null);
+    await reportProgress({ done: blockDone, total: blockTotal, phase: "blocking" });
+  }
+}
+
 async function drain(): Promise<void> {
   draining = true;
   // Keep the service worker alive (and the icon badge blinking) for the run.
@@ -193,17 +234,15 @@ async function drain(): Promise<void> {
     // Enforce the rolling hourly/daily block caps before taking the next
     // target. The counts come from the persisted block log, so the limit holds
     // across tab reloads and separate runs — it tracks the account, not this
-    // one drain. When a cap is hit we pause (resumable) so the user decides when
-    // to continue, rather than blocking through X's automation thresholds.
+    // one drain. When a cap is hit we don't stop: we wait out the rolling window
+    // (the oldest blocks age past the trailing hour/day boundary and free a
+    // slot) and auto-resume, rather than blocking through X's thresholds.
     const cfg = await getConfig();
     const cap = capReached((await getLog()).map((e) => e.at), cfg.maxPerHour, cfg.maxPerDay);
     if (cap) {
-      const msg =
-        cap === "day"
-          ? `Daily limit reached (${cfg.maxPerDay} blocks) — resume after a 24h break.`
-          : `Hourly limit reached (${cfg.maxPerHour} blocks) — resume after a break.`;
-      await setLastError(msg);
-      pauseRun(msg);
+      await waitOutCap();
+      // Re-evaluate from the top: a cleared cap falls through to blocking; a
+      // user pause taken during the wait is caught by the wait-while-paused gate.
       continue;
     }
 
@@ -271,15 +310,18 @@ async function drain(): Promise<void> {
 /**
  * A tab reload or extension update tears down the content script mid-run: the
  * in-memory queue and drain loop are lost, but the persisted progress is left
- * frozen at "blocking"/"paused". Rehydrate the queue from storage and resume
- * draining so the run actually continues (and the toolbar dot reappears). A
- * paused run resumes paused — the user un-pauses it from the popup. A run whose
- * queue is gone is finalized so stale "in progress" state doesn't linger.
+ * frozen at "blocking"/"paused"/"waiting". Rehydrate the queue from storage and
+ * resume draining so the run actually continues (and the toolbar dot reappears).
+ * A paused run resumes paused — the user un-pauses it from the popup. A waiting
+ * run resumes active and the drain loop recomputes the cap cooldown from the
+ * persisted log (so it picks up mid-cooldown after a restart, or just carries on
+ * if the window has since cleared). A run whose queue is gone is finalized so
+ * stale "in progress" state doesn't linger.
  */
 async function resumeInterruptedRun(): Promise<void> {
   if (draining) return;
   const p = await getBlockProgress();
-  if (p?.phase !== "blocking" && p?.phase !== "paused") return;
+  if (p?.phase !== "blocking" && p?.phase !== "paused" && p?.phase !== "waiting") return;
 
   const queue = await getBlockQueue();
   if (!queue.length) {

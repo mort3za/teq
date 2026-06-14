@@ -9,7 +9,7 @@ Chrome extension. Collect X.com (Twitter) users whose **display name or @handle*
 - Each match also records the **language** of the tweet it was found on (from X's own `lang` attribute), so you can review by language later.
 - Matches accumulate in a **collected list**. Open **Review** to see them all in a full-page overlay: filter by language, select who to block, remove ones you don't want.
 - Hit **Block selected** → blocked via X's own `blocks/create` API (the same call the site makes when you click "Block"). Never blocks yourself.
-- The run is **paced and capped** so X doesn't flag it as automation (see below). You can **pause/resume** it at any time, and it **survives a tab reload** — a run picks up where it left off.
+- The run is **paced and capped** so X doesn't flag it as automation (see below). You can **pause/resume** it at any time, and it **survives a tab reload or browser restart** — a run picks up where it left off (reopen an x.com tab to let it continue).
 - On 401/403/429 → the run **pauses** (it doesn't die), leaving the rest queued so you can resume after a break.
 
 ## Rules & settings (config)
@@ -34,8 +34,9 @@ On the Options page you can also **export** the config to a JSON file and **impo
 X treats rapid-fire blocking as bot activity, so blocks are never fired off instantly:
 
 - **Pacing** — each block waits `pacingSeconds` (default 30s) plus up to 30% random jitter before the next. The jitter keeps the cadence from looking mechanical.
-- **Rolling caps** — the run also stops once you've blocked `maxPerHour` accounts within the trailing hour, or `maxPerDay` within the trailing day. These count against the **block log**, so the limit holds across tab reloads and separate runs — it tracks your account, not a single run.
-- When a cap is hit (or X returns a 429/403/401) the run **pauses** rather than dies. The remaining accounts stay queued; resume from the popup after a break.
+- **Rolling caps** — the run also throttles once you've blocked `maxPerHour` accounts within the trailing hour, or `maxPerDay` within the trailing day. These count against the **block log**, so the limit holds across tab reloads and separate runs — it tracks your account, not a single run.
+- When a cap is hit the run **waits and auto-resumes**: it cools down until the oldest blocks age past the trailing hour/day boundary and free a slot, then continues on its own — no need to come back and click resume. The popup shows a "Waiting — resumes in …" countdown. Because the caps are rolling (not a midnight reset), it resumes as soon as the window clears, which naturally carries a run across into the next hour or day. The cooldown survives a tab reload or browser restart (it's recomputed from the block log) — just keep, or reopen, an x.com tab so the run has somewhere to continue. You can still manually pause a waiting run from the popup to stop the auto-resume.
+- When X returns a 429/403/401 the run **pauses** rather than dies (this one needs a manual resume — it means X is pushing back). The remaining accounts stay queued; resume from the popup after a break.
 
 Keep the X tab open while a run is in progress — blocking only happens from the content script on the x.com origin. A small dot on the toolbar icon shows run state: **green** while blocking, **yellow** while paused.
 

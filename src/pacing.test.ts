@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { blockDelayMs, PACING_JITTER, capReached } from "./pacing.ts";
+import { blockDelayMs, PACING_JITTER, capReached, capRetryMs, fmtDuration } from "./pacing.ts";
 
 test("with zero jitter the delay is exactly the configured pacing", () => {
   expect(blockDelayMs(30, 0)).toBe(30_000);
@@ -73,4 +73,35 @@ test("a cap of 0 disables that limit", () => {
   expect(capReached(recent(100, 1), 0, 0, NOW)).toBeNull();
   // hourly off, daily still enforced
   expect(capReached(recent(100, 1), 0, 50, NOW)).toBe("day");
+});
+
+test("capRetryMs is 0 when no cap is reached", () => {
+  expect(capRetryMs(recent(5, 5), 40, 250, NOW)).toBe(0);
+});
+
+test("capRetryMs waits for the oldest hourly block to age out", () => {
+  // 40 blocks one per minute fill the hour; the oldest is 39 min old, so a slot
+  // frees in 60 - 39 = 21 minutes.
+  expect(capRetryMs(recent(40, 1), 40, 250, NOW)).toBe(21 * MIN);
+});
+
+test("capRetryMs waits on the daily window when the day cap is the one hit", () => {
+  // 60 blocks one per minute, day cap 50: drop the count to 49 by aging out the
+  // 11 oldest. The 11th-oldest is 49 min old, so it clears in 24h - 49m.
+  expect(capRetryMs(recent(60, 1), 40, 50, NOW)).toBe(24 * HOUR - 49 * MIN);
+});
+
+test("after capRetryMs elapses the cap has cleared", () => {
+  const ts = recent(40, 1);
+  const wait = capRetryMs(ts, 40, 250, NOW);
+  expect(capReached(ts, 40, 250, NOW + wait)).toBeNull();
+});
+
+test("fmtDuration formats seconds, minutes, and hours", () => {
+  expect(fmtDuration(45_000)).toBe("45s");
+  expect(fmtDuration(90_000)).toBe("1m");
+  expect(fmtDuration(21 * MIN)).toBe("21m");
+  expect(fmtDuration(HOUR)).toBe("1h 0m");
+  expect(fmtDuration(2 * HOUR + 5 * MIN)).toBe("2h 5m");
+  expect(fmtDuration(-1000)).toBe("0s");
 });

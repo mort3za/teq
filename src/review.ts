@@ -299,11 +299,13 @@ function doBlock(): void {
 
   onBlock(handles, (p) => {
     if (!statusEl) return;
-    if (p.phase === "blocking" || p.phase === "paused") {
+    if (p.phase === "blocking" || p.phase === "paused" || p.phase === "waiting") {
       statusEl.textContent =
         p.phase === "paused"
           ? `Paused${p.error ? ` (${p.error})` : ""} — ${p.done}/${p.total}`
-          : `Blocking ${p.done}/${p.total}…`;
+          : p.phase === "waiting"
+            ? `${p.error ?? "Waiting"} — ${p.done}/${p.total}`
+            : `Blocking ${p.done}/${p.total}…`;
       return;
     }
     blocking = false;
