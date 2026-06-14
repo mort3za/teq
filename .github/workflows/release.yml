@@ -1,0 +1,30 @@
+name: Build & Release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - run: bun install --frozen-lockfile
+
+      - run: bun test
+
+      - run: bun run build
+
+      - name: Zip the extension
+        run: cd dist && zip -r "../teq-${{ github.ref_name }}.zip" .
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: teq-${{ github.ref_name }}.zip
+          generate_release_notes: true

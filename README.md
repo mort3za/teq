@@ -12,14 +12,16 @@ You write a few rules (words or emoji). As you scroll X, teq quietly collects ev
 
 ## Install
 
-A ready-to-use build lives in [`dist/`](dist/), so you don't need any tools.
+A ready-to-use build is attached to every [release](https://github.com/mort3za/teq/releases), so you don't need any tools.
 
-1. **Download the repo** — _Code → Download ZIP_ on GitHub (or `git clone`), then unzip.
+1. **Download** `teq-*.zip` from the [latest release](https://github.com/mort3za/teq/releases/latest), then unzip it.
 2. Open **`chrome://extensions`** in Chrome.
 3. Turn on **Developer mode** (top-right).
-4. Click **Load unpacked** and select the **`dist/`** folder.
+4. Click **Load unpacked** and select the unzipped folder.
 
 The teq icon appears in your toolbar. You're ready.
+
+> Prefer to build it yourself? See [Build from source](#build-from-source). The full project is also on each release page as _Source code (zip)_.
 
 ---
 
