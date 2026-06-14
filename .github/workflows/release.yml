@@ -18,6 +18,16 @@ jobs:
 
       - run: bun test
 
+      - name: Stamp version from tag into manifest.json
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          bun --eval "
+            const m = await Bun.file('manifest.json').json();
+            m.version = '$VERSION';
+            await Bun.write('manifest.json', JSON.stringify(m, null, 2) + '\n');
+          "
+          echo "manifest.json version -> $VERSION"
+
       - run: bun run build
 
       - name: Zip the extension

@@ -12,7 +12,8 @@
   "scripts": {
     "build": "bun run build.ts",
     "watch": "bun run build.ts --watch",
-    "test": "bun test"
+    "test": "bun test",
+    "release": "bun run scripts/release.ts"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.10.3",
