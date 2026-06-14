@@ -1,7 +1,7 @@
 {
   "name": "teq",
   "description": "A browser extension to collect and block specific X.com accounts.",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "module": "index.ts",
   "type": "module",
   "license": "MIT",
