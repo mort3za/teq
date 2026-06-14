@@ -15,8 +15,10 @@
     "test": "bun test"
   },
   "devDependencies": {
+    "@happy-dom/global-registrator": "^20.10.3",
     "@types/bun": "latest",
-    "@types/chrome": "^0.1.43"
+    "@types/chrome": "^0.1.43",
+    "happy-dom": "^20.10.3"
   },
   "peerDependencies": {
     "typescript": "^6.0.3"

@@ -3,6 +3,7 @@
 // separate, explicit step driven from the popup.
 
 import { matchReason } from "./matcher.ts";
+import { extractUser } from "./extract.ts";
 import { blockUser, BlockError } from "./blocker.ts";
 import { openReview, type BlockProgress } from "./review.ts";
 import { blockDelayMs, capReached, capRetryMs, fmtDuration } from "./pacing.ts";
@@ -59,44 +60,6 @@ function detectOwnHandle(): void {
   const btn = document.querySelector('[data-testid="SideNav_AccountSwitcher_Button"]');
   const m = btn?.textContent?.match(/@([A-Za-z0-9_]+)/);
   if (m) ownHandle = m[1]!.toLowerCase();
-}
-
-// Like textContent, but emoji that X renders as Twemoji <img> elements (the
-// actual character lives in the alt attribute) are restored — textContent alone
-// would drop them, so emoji in display names would never match.
-function richText(el: Element): string {
-  let out = "";
-  for (const node of el.childNodes) {
-    if (node.nodeType === Node.TEXT_NODE) {
-      out += node.textContent ?? "";
-    } else if (node instanceof HTMLImageElement) {
-      out += node.alt;
-    } else if (node instanceof Element) {
-      out += richText(node);
-    }
-  }
-  return out;
-}
-
-/** Extract { handle, name } from a [data-testid="User-Name"] container. */
-function extractUser(el: Element): { handle: string; name: string } | null {
-  let handle = "";
-  for (const a of el.querySelectorAll('a[href^="/"]')) {
-    const href = a.getAttribute("href") ?? "";
-    const m = href.match(/^\/([A-Za-z0-9_]+)$/);
-    if (m) {
-      handle = m[1]!;
-      break;
-    }
-  }
-  if (!handle) return null;
-
-  // The container text is roughly "Display Name@handle·time"; the display name
-  // is everything before the "@handle" token.
-  const full = richText(el).trim();
-  const at = full.indexOf("@" + handle);
-  const name = (at >= 0 ? full.slice(0, at) : full).trim();
-  return { handle, name };
 }
 
 /**

@@ -28,32 +28,46 @@ so X doesn't flag it as automation. See `README.md` for the user-facing guide.
 ## Layout
 
 ```
-src/content.ts   Content script on x.com. Auto-scans the DOM on an interval
-                 (richText() restores Twemoji <img> emoji), collects matches,
-                 and drains a paced block queue (SECONDS_PER_BLOCK + jitter;
-                 stops on 401/403/429). Message-driven from the popup:
-                 "collect" scans, "review" opens the overlay.
+src/content.ts   Content script on x.com. Auto-scans the DOM on an interval,
+                 collects matches (via extract.ts), and drains a paced block
+                 queue (SECONDS_PER_BLOCK + jitter; stops/cools down on
+                 401/403/429). Message-driven from the popup: "collect" scans,
+                 "review" opens the overlay.
+src/extract.ts   Pure DOM extraction for a "User-Name" cell (no chrome) —
+                 unit-testable. extractUser() pulls { handle, name }; richText()
+                 restores Twemoji <img> emoji. Keys only off stable, semantic
+                 signals, never X's build-hashed CSS classes.
 src/matcher.ts   Pure match logic (no DOM/chrome) — unit-testable. matchReason()
                  = case-insensitive substring; parseWords() parses the textarea.
 src/blocker.ts   Wraps X blocks/create.json (same-origin authed fetch; ct0 CSRF).
 src/pacing.ts    Pure timing logic (no DOM/chrome) — unit-testable. blockDelayMs()
-                 = paced delay between blocks + up to PACING_JITTER random jitter.
+                 = paced delay between blocks + up to PACING_JITTER random jitter;
+                 capReached()/capRetryMs() handle hourly/daily cooldowns.
 src/storage.ts   chrome.storage. Config (words, autoCollect) in `sync`;
                  collected list, block log, last error in `local`. Source of
                  truth for the Config / CollectedUser / LogEntry types.
+src/i18n.ts      Translation strings + t()/setLang() helpers. Unit-tested.
 src/lang.ts      BCP-47 code → language name helpers for the language filters
                  (lang comes from X's `lang` attr on the matched tweet).
+src/csv.ts       Tiny RFC-4180 CSV (de)serializer (no DOM/chrome) — unit-testable.
+src/nav.ts       Keeps the sidebar "(N)" count badges in sync; shared by pages.
+src/background.ts Service worker: paints a status dot onto the toolbar icon
+                 (green blocking / yellow paused / blue queued). Kept alive
+                 during a run by a "block-run" port from content.ts.
 src/review.ts    Full-page "review & block" overlay injected into x.com, in a
                  Shadow DOM. Selecting + Block hands handles to content.ts's queue.
 src/popup.*      Toolbar popup: edit rules, Collect matches, open review, links
                  to the standalone pages. Sends messages to the content script.
+src/options.*    Full options page (open_in_tab): rules + settings editor.
 src/collected.*  Standalone extension page: search/paginate/clear collected list.
 src/blocks.*     Standalone extension page: search/paginate/clear block log.
-src/*.test.ts    bun tests (matcher.test.ts, csv.test.ts, pacing.test.ts).
-build.ts         Bundle each entry (content, popup, blocks, collected) → IIFE in
-                 dist/; copy manifest/html/css/icons. `bun run build [--watch]`.
+src/*.test.ts    bun tests (matcher, extract, csv, pacing, i18n).
+build.ts         Bundle each entry (content, popup, blocks, collected, options,
+                 background) → IIFE in dist/; copy manifest/html/css/icons.
+                 `bun run build [--watch]`.
 manifest.json    MV3, perms: storage; hosts: x.com, twitter.com. Popup =
-                 popup.html; content.js injected at document_idle.
+                 popup.html; options.html (open_in_tab); background service
+                 worker; content.js injected at document_idle.
 ```
 
 Flow: popup → `chrome.tabs.sendMessage` → content.ts collects/opens review →
