@@ -96,6 +96,8 @@ bun test
 
 After rebuilding, click the **reload ↻** icon on the extension card in `chrome://extensions` to load the new code.
 
+> **No signing key needed.** You don't need `key.pem` to build or run teq — it's the maintainer's private key for publishing signed releases and isn't part of the repo. The public half is already in `manifest.json` (`"key"`), which is all Chrome needs to give your unpacked build a stable ID.
+
 ---
 
 ## Good to know
