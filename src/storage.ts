@@ -25,6 +25,9 @@ export interface Config {
   /** Fold Persian/Arabic letter and digit variants when matching (off by
    * default; useful for Persian/Arabic rules). */
   persianNormalize: boolean;
+  /** Also match against the @username, not just the display name (off by
+   * default — display name only). */
+  matchHandle: boolean;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -36,6 +39,7 @@ export const DEFAULT_CONFIG: Config = {
   maxPerDay: 250,
   lang: detectLang(),
   persianNormalize: false,
+  matchHandle: false,
 };
 
 /** A matched user waiting to be reviewed and blocked. */

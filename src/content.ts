@@ -133,10 +133,12 @@ async function collect(): Promise<number> {
     if (key === ownHandle || existing.has(key)) continue;
     existing.add(key);
 
-    // Match the display name first; if it doesn't match, also check the
-    // @username. Username matching is always on — there's no config for it.
+    // Match the display name; when the matchHandle option is on, also check the
+    // @username (off by default — display name only).
     const opts = { words: cfg.words, normalize: cfg.persianNormalize };
-    const reason = matchReason(user.name, opts) ?? matchReason(user.handle, opts);
+    const reason =
+      matchReason(user.name, opts) ??
+      (cfg.matchHandle ? matchReason(user.handle, opts) : null);
     if (!reason) continue;
 
     found.push({ handle: user.handle, name: user.name, reason, lang: tweetLang(el) });

@@ -286,6 +286,29 @@ h1 {
   max-width: 60ch;
 }
 
+.info {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 60ch;
+}
+
+.info p {
+  margin: 0 0 8px;
+}
+
+.info p:last-child {
+  margin-bottom: 0;
+}
+
+.info-title {
+  font-weight: 600;
+}
+
 .field label {
   display: block;
   font-weight: 600;

@@ -61,7 +61,7 @@
         <div class="field">
           <label for="words" data-i18n="common.wordsLabel">Words / emoji to match (one per line)</label>
           <textarea id="words" rows="8" placeholder="crypto&#10;airdrop&#10;🚀"></textarea>
-          <p class="hint" data-i18n="options.wordsHint">A display name or @handle containing any of these (case-insensitive) is collected.</p>
+          <p class="hint" data-i18n="options.wordsHint">A display name containing any of these (case-insensitive) is collected. Enable "Also match the @username" below to match handles too.</p>
         </div>
 
         <div class="field">
@@ -78,6 +78,20 @@
           </p>
         </div>
 
+        <div class="field">
+          <label class="switch-field">
+            <span class="switch">
+              <input id="matchHandle" type="checkbox" />
+              <span class="slider"></span>
+            </span>
+            <span data-i18n="options.matchHandle">Also match the @username</span>
+          </label>
+          <p class="hint" data-i18n="options.matchHandleHint">
+            Matches your words against the @username too, not just the display name. Off by default — only the display
+            name is matched.
+          </p>
+        </div>
+
         <details class="advanced">
           <summary data-i18n="options.advanced">Advanced</summary>
 
@@ -87,6 +101,23 @@
             account rate-limited, temporarily locked, or permanently suspended. Only change these if you understand
             the risk.
           </p>
+
+          <aside class="info">
+            <p class="info-title" data-i18n="options.limitsTitle">Why these limits aren't exact</p>
+            <p data-i18n="options.limitsTrust">
+              X doesn't enforce one fixed limit — it's calculated live from your account's standing. Older accounts,
+              accounts with a linked phone number, and paid X Premium accounts tolerate far more. A brand-new,
+              unverified free account can get flagged after as few as ~50 blocks in a day, while an established Premium
+              account may clear hundreds. Lower the caps below if your account is new or unverified; raise them only
+              cautiously if it's well-established.
+            </p>
+            <p data-i18n="options.limitsWindow">
+              X tracks actions in short rolling windows (typically 15 minutes and 1 hour). A 24-hour lockout is usually
+              triggered by short-term velocity, not a daily total — repeatedly hitting the short-window speed makes you
+              look automated, and X locks you out for the day. That's why "Seconds between blocks" matters more than the
+              daily cap: keeping each block slow and well-spaced is your best protection.
+            </p>
+          </aside>
 
           <div class="field">
             <label for="scan" data-i18n="options.scanLabel">Seconds between scans</label>

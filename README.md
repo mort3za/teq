@@ -2,9 +2,9 @@
 
 **English** · [فارسی](README.fa.md)
 
-A Chrome extension that finds X.com (Twitter) accounts by **name or @handle** and blocks them for you — safely, in the background, while you browse.
+A Chrome extension that finds X.com (Twitter) accounts by their **display name** (or, optionally, their **@handle**) and blocks them for you — safely, in the background, while you browse.
 
-You write a few rules (words or emoji). As you scroll X, teq quietly collects everyone whose display name or handle matches. When you're ready, you review the list and block them in one click. teq then blocks them one at a time, slowly enough that X never sees a bot.
+You write a few rules (words or emoji). As you scroll X, teq quietly collects everyone whose display name matches — and, if you turn on **Match @username**, their handle too. When you're ready, you review the list and block them in one click. teq then blocks them one at a time, slowly enough that X never sees a bot.
 
 > **Heads up:** Blocking is hard to undo at scale. teq always lets you review and edit the list before anything happens — nothing is blocked automatically.
 
@@ -25,7 +25,7 @@ The teq icon appears in your toolbar. You're ready.
 
 ## How to use it
 
-**1. Set your rules.** Click the toolbar icon and add words or emoji — one per line. A match is a case-insensitive substring, checked against both the display name _and_ the @handle.
+**1. Set your rules.** Click the toolbar icon and add words or emoji — one per line. A match is a case-insensitive substring, checked against the display name (and the @handle too, if you enable **Match @username** in Options).
 
 **2. Browse X.** Leave auto-collect on (the default) and just scroll. teq scans the page every few seconds and adds matching accounts to your **collected list**. No clicking required.
 
@@ -55,7 +55,7 @@ Edit your rules and the auto-collect toggle right in the popup. The full set liv
 
 | Setting           | What it does                                               | Default |
 | ----------------- | ---------------------------------------------------------- | ------- |
-| **Words**         | Substrings to match against names/handles (emoji work too) | empty   |
+| **Words**         | Substrings to match against display names (emoji work too) | empty   |
 | **Auto-collect**  | Scan the page for matches automatically as you scroll      | on      |
 | **Scan interval** | Seconds between automatic scans                            | 3       |
 | **Pacing**        | Base seconds between blocks (+ up to 30% jitter)           | 30      |
@@ -63,6 +63,7 @@ Edit your rules and the auto-collect toggle right in the popup. The full set liv
 | **Max per day**   | Cap on blocks in any rolling 24 h (`0` = no limit)         | 250     |
 | **Language**      | Interface language — English or Persian (فارسی), switchable live | auto¹   |
 | **Persian/Arabic matching** | Fold Arabic ي/ك ↔ Persian ی/ک and Arabic-Indic ↔ Persian digits when matching | off |
+| **Match @username** | Also match your words against the @handle, not just the display name | off |
 
 ¹ Defaults to Persian if your browser's UI language is Persian, otherwise English.
 

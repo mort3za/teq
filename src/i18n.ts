@@ -60,15 +60,23 @@ const en: Dict = {
   "options.autoCollectHint":
     "When on, the content script scans X for matches automatically. Turn it off to pause collecting without losing your rules.",
   "options.wordsHint":
-    "A display name or @handle containing any of these (case-insensitive) is collected.",
+    "A display name containing any of these (case-insensitive) is collected. Enable \"Also match the @username\" below to match handles too.",
   "options.language": "Language",
   "options.languageHint": "Language of this extension's interface.",
   "options.persianNormalize": "Match Persian / Arabic letter and digit variants",
   "options.persianNormalizeHint":
     "Treats Arabic ي/ك and Persian ی/ک — and Arabic-Indic vs. Persian digits — as the same when matching. Off by default; turn it on for Persian/Arabic rules.",
+  "options.matchHandle": "Also match the @username",
+  "options.matchHandleHint":
+    "Matches your words against the @username too, not just the display name. Off by default — only the display name is matched.",
   "options.advanced": "Advanced",
   "options.warning":
     "⚠️ These pacing and rate limits are tuned to keep blocking under X's automation radar. Raising them — or blocking faster than the recommended ranges — makes your activity look automated, which can get your X account rate-limited, temporarily locked, or permanently suspended. Only change these if you understand the risk.",
+  "options.limitsTitle": "Why these limits aren't exact",
+  "options.limitsTrust":
+    "X doesn't enforce one fixed limit — it's calculated live from your account's standing. Older accounts, accounts with a linked phone number, and paid X Premium accounts tolerate far more. A brand-new, unverified free account can get flagged after as few as ~50 blocks in a day, while an established Premium account may clear hundreds. Lower the caps below if your account is new or unverified; raise them only cautiously if it's well-established.",
+  "options.limitsWindow":
+    "X tracks actions in short rolling windows (typically 15 minutes and 1 hour). A 24-hour lockout is usually triggered by short-term velocity, not a daily total — repeatedly hitting the short-window speed makes you look automated, and X locks you out for the day. That's why \"Seconds between blocks\" matters more than the daily cap: keeping each block slow and well-spaced is your best protection.",
   "options.scanLabel": "Seconds between scans",
   "options.scanHint":
     "How often the page is automatically scanned for new matches while auto-collect is on.",
@@ -172,15 +180,23 @@ const fa: Dict = {
   "options.autoCollectHint":
     "وقتی روشن باشد، اسکریپت محتوا به‌طور خودکار X را برای موارد منطبق اسکن می‌کند. برای توقف جمع‌آوری بدون از دست رفتن قواعد، آن را خاموش کنید.",
   "options.wordsHint":
-    "هر نام نمایشی یا @نام‌کاربری که شامل هر یک از این‌ها باشد (بدون حساسیت به بزرگی/کوچکی) جمع‌آوری می‌شود.",
+    "هر نام نمایشی که شامل هر یک از این‌ها باشد (بدون حساسیت به بزرگی/کوچکی) جمع‌آوری می‌شود. برای تطبیق نام کاربری هم، گزینهٔ «تطبیق با @نام‌کاربری» پایین را روشن کنید.",
   "options.language": "زبان",
   "options.languageHint": "زبان رابط کاربری این افزونه.",
   "options.persianNormalize": "تطبیق گونه‌های حروف و ارقام فارسی / عربی",
   "options.persianNormalizeHint":
     "هنگام تطبیق، ي/ك عربی و ی/ک فارسی — و ارقام عربی در برابر فارسی — یکسان در نظر گرفته می‌شوند. به‌طور پیش‌فرض خاموش است؛ برای قواعد فارسی/عربی روشنش کنید.",
+  "options.matchHandle": "تطبیق با @نام‌کاربری",
+  "options.matchHandleHint":
+    "کلمات شما را علاوه بر نام نمایشی، با @نام‌کاربری هم تطبیق می‌دهد. به‌طور پیش‌فرض خاموش است — تنها نام نمایشی تطبیق داده می‌شود.",
   "options.advanced": "پیشرفته",
   "options.warning":
     "⚠️ این فاصله‌ها و محدودیت‌های نرخ طوری تنظیم شده‌اند که مسدودسازی زیر رادار خودکارسازی X بماند. افزایش آن‌ها — یا مسدودسازی سریع‌تر از بازه‌های توصیه‌شده — فعالیت شما را خودکار جلوه می‌دهد و می‌تواند حساب X شما را محدود، موقتاً قفل یا برای همیشه معلق کند. فقط در صورتی این‌ها را تغییر دهید که خطر را می‌دانید.",
+  "options.limitsTitle": "چرا این محدودیت‌ها دقیق نیستند",
+  "options.limitsTrust":
+    "X یک محدودیت ثابت اعمال نمی‌کند — این مقدار به‌صورت زنده بر اساس اعتبار حساب شما محاسبه می‌شود. حساب‌های قدیمی‌تر، حساب‌هایی با شمارهٔ تلفن متصل، و حساب‌های پولی X Premium تحمل بسیار بیشتری دارند. یک حساب رایگانِ کاملاً جدید و تأییدنشده ممکن است تنها پس از حدود ۵۰ مسدودسازی در روز علامت‌گذاری شود، در حالی که یک حساب جاافتادهٔ Premium می‌تواند صدها مورد را بدون مشکل انجام دهد. اگر حساب شما جدید یا تأییدنشده است سقف‌های زیر را پایین بیاورید؛ تنها در صورت جاافتاده بودن حساب، با احتیاط آن‌ها را بالا ببرید.",
+  "options.limitsWindow":
+    "X کنش‌ها را در بازه‌های متحرک کوتاه (معمولاً ۱۵ دقیقه و ۱ ساعت) دنبال می‌کند. قفل ۲۴ ساعته معمولاً به‌خاطر سرعت کوتاه‌مدت رخ می‌دهد، نه مجموع روزانه — برخورد مکرر به محدودیت سرعتِ بازهٔ کوتاه شما را خودکار جلوه می‌دهد و X برای آن روز قفل‌تان می‌کند. به همین دلیل «ثانیه بین هر مسدودسازی» مهم‌تر از سقف روزانه است: آهسته و بافاصله نگه داشتن هر مسدودسازی بهترین محافظت شماست.",
   "options.scanLabel": "ثانیه بین هر اسکن",
   "options.scanHint":
     "هر چند وقت یک‌بار صفحه به‌طور خودکار برای موارد منطبق جدید اسکن شود، تا وقتی جمع‌آوری خودکار روشن است.",

@@ -13,6 +13,7 @@ const wordsEl = $<HTMLTextAreaElement>("words");
 const autoCollect = $<HTMLInputElement>("autoCollect");
 const langEl = $<HTMLSelectElement>("lang");
 const persianNormalize = $<HTMLInputElement>("persianNormalize");
+const matchHandle = $<HTMLInputElement>("matchHandle");
 const scan = $<HTMLInputElement>("scan");
 const pacing = $<HTMLInputElement>("pacing");
 const maxPerHour = $<HTMLInputElement>("maxPerHour");
@@ -33,6 +34,7 @@ async function load(): Promise<void> {
   applyI18n();
   langEl.value = cfg.lang;
   persianNormalize.checked = cfg.persianNormalize;
+  matchHandle.checked = cfg.matchHandle;
   wordsEl.value = cfg.words.join("\n");
   autoCollect.checked = cfg.autoCollect;
   scan.value = String(cfg.scanSeconds);
@@ -70,6 +72,7 @@ async function save(): Promise<void> {
     words: parseWords(wordsEl.value),
     autoCollect: autoCollect.checked,
     persianNormalize: persianNormalize.checked,
+    matchHandle: matchHandle.checked,
     scanSeconds,
     pacingSeconds,
     maxPerHour: perHour,
@@ -88,6 +91,7 @@ async function changeLang(): Promise<void> {
 
 langEl.addEventListener("change", () => void changeLang());
 persianNormalize.addEventListener("change", () => void save());
+matchHandle.addEventListener("change", () => void save());
 wordsEl.addEventListener("input", () => void save());
 autoCollect.addEventListener("change", () => void save());
 scan.addEventListener("change", () => void save());
@@ -140,6 +144,9 @@ importBtn.addEventListener("click", () => {
     }
     if (typeof data.persianNormalize === "boolean") {
       patch.persianNormalize = data.persianNormalize;
+    }
+    if (typeof data.matchHandle === "boolean") {
+      patch.matchHandle = data.matchHandle;
     }
     if (data.lang === "en" || data.lang === "fa") {
       patch.lang = data.lang;
