@@ -1,76 +1,96 @@
 # teq
 
-Chrome extension. Collect X.com (Twitter) users whose **display name or @handle** matches your word/emoji rules, review them, then block.
+A Chrome extension that finds X.com (Twitter) accounts by **name or @handle** and blocks them for you — safely, in the background, while you browse.
 
-## What it does
+You write a few rules (words or emoji). As you scroll X, teq quietly collects everyone whose display name or handle matches. When you're ready, you review the list and block them in one click. teq then blocks them one at a time, slowly enough that X never sees a bot.
 
-- As you browse x.com it **auto-scans** the rendered page for user cells (display name + @handle) on an interval. No clicking required — matches just accumulate. (You can turn auto-collect off and scan on demand with **Collect matches** in the popup instead.)
-- Match against your rules: word substrings (case-insensitive); emoji listed as words match too. Both the display name **and** the @username are checked.
-- Each match also records the **language** of the tweet it was found on (from X's own `lang` attribute), so you can review by language later.
-- Matches accumulate in a **collected list**. Open **Review** to see them all in a full-page overlay: filter by language, select who to block, remove ones you don't want.
-- Hit **Block selected** → blocked via X's own `blocks/create` API (the same call the site makes when you click "Block"). Never blocks yourself.
-- The run is **paced and capped** so X doesn't flag it as automation (see below). You can **pause/resume** it at any time, and it **survives a tab reload or browser restart** — a run picks up where it left off (reopen an x.com tab to let it continue).
-- On 401/403/429 → the run **pauses** (it doesn't die), leaving the rest queued so you can resume after a break.
+> **Heads up:** Blocking is hard to undo at scale. teq always lets you review and edit the list before anything happens — nothing is blocked automatically.
 
-## Rules & settings (config)
+---
 
-Edit rules and the auto-collect toggle in the popup; the full settings live on the **Options** page (`options.html`, opens in a tab).
+## Install
 
-| field           | meaning                                                         | default |
-| --------------- | --------------------------------------------------------------- | ------- |
-| `words`         | substrings; display name or @handle containing any → match      | `[]`    |
-| `autoCollect`   | auto-scan the page for matches on an interval                   | `true`  |
-| `scanSeconds`   | seconds between automatic page scans                            | `3`     |
-| `pacingSeconds` | base seconds to wait between blocks (+ up to 30% random jitter) | `30`    |
-| `maxPerHour`    | max blocks in any rolling 60-minute window (`0` = no limit)     | `40`    |
-| `maxPerDay`     | max blocks in any rolling 24-hour window (`0` = no limit)       | `250`   |
+A ready-to-use build lives in [`dist/`](dist/), so you don't need any tools.
 
-Config lives in `chrome.storage.sync` (roams with your account). The collected list, block log, run progress, the active block queue, and last error live in `chrome.storage.local` (the log keeps the last 500 entries).
+1. **Download the repo** — _Code → Download ZIP_ on GitHub (or `git clone`), then unzip.
+2. Open **`chrome://extensions`** in Chrome.
+3. Turn on **Developer mode** (top-right).
+4. Click **Load unpacked** and select the **`dist/`** folder.
 
-On the Options page you can also **export** the config to a JSON file and **import** it back — handy for backup or sharing your rules.
+The teq icon appears in your toolbar. You're ready.
 
-### How the pacing & rate limits work
+---
 
-X treats rapid-fire blocking as bot activity, so blocks are never fired off instantly:
+## How to use it
 
-- **Pacing** — each block waits `pacingSeconds` (default 30s) plus up to 30% random jitter before the next. The jitter keeps the cadence from looking mechanical.
-- **Rolling caps** — the run also throttles once you've blocked `maxPerHour` accounts within the trailing hour, or `maxPerDay` within the trailing day. These count against the **block log**, so the limit holds across tab reloads and separate runs — it tracks your account, not a single run.
-- When a cap is hit the run **waits and auto-resumes**: it cools down until the oldest blocks age past the trailing hour/day boundary and free a slot, then continues on its own — no need to come back and click resume. The popup shows a "Waiting — resumes in …" countdown. Because the caps are rolling (not a midnight reset), it resumes as soon as the window clears, which naturally carries a run across into the next hour or day. The cooldown survives a tab reload or browser restart (it's recomputed from the block log) — just keep, or reopen, an x.com tab so the run has somewhere to continue. You can still manually pause a waiting run from the popup to stop the auto-resume.
-- When X returns a 429/403/401 the run **pauses** rather than dies (this one needs a manual resume — it means X is pushing back). The remaining accounts stay queued; resume from the popup after a break.
+**1. Set your rules.** Click the toolbar icon and add words or emoji — one per line. A match is a case-insensitive substring, checked against both the display name _and_ the @handle.
 
-Keep the X tab open while a run is in progress — blocking only happens from the content script on the x.com origin. A small dot on the toolbar icon shows run state: **green** while blocking, **yellow** while paused.
+**2. Browse X.** Leave auto-collect on (the default) and just scroll. teq scans the page every few seconds and adds matching accounts to your **collected list**. No clicking required.
 
-## Install (no build needed)
+**3. Review and block.** Open **Review** from the popup for a full-page list of everyone collected. Filter by language, deselect anyone you want to keep, then hit **Block selected**. teq blocks them one by one in the background — keep the X tab open and watch the progress.
 
-The prebuilt extension is committed in [`dist/`](dist/), so you can install it without any tooling.
+That's the whole loop: **rules → collect → review → block.**
 
-1. Download this repo: click **Code → Download ZIP** on GitHub and unzip it, or `git clone` it.
-2. Open `chrome://extensions` in Chrome.
-3. Toggle **Developer mode** on (top-right corner).
-4. Click **Load unpacked** and pick the `dist/` folder from the repo.
-5. The extension appears in the toolbar. Click it, set your rules, then browse x.com and use **Review** → **Block selected**.
+---
 
-## Pages
+## Why it won't get you flagged
 
-- **Popup** (toolbar icon) — edit rules, toggle auto-collect, see the collected count and live run progress (with pause/resume), open **Review**, and link to the standalone pages.
-- **Review overlay** — injected full-page into x.com (style-isolated in a Shadow DOM): language filter, select all, per-row remove, and **Block selected**. Stays open during the paced run so you can watch progress.
-- **Options** — full settings (rules, auto-collect, scan interval, pacing, hourly/daily caps) plus config export/import.
-- **Collected** — standalone page to search/paginate/clear the collected list.
-- **Blocks** — standalone page to search/paginate/clear the block log.
+X treats rapid-fire blocking as bot activity, so teq deliberately goes slow and stays within human-looking limits.
 
-## Build from source (optional)
+- **Paced** — waits ~30s between blocks (plus a little random jitter, so the rhythm isn't mechanical).
+- **Rate-capped** — stops after 40 blocks/hour or 250/day by default. These are rolling windows tracked against your whole block history, not a single run, so they hold across reloads.
+- **Self-resuming** — when a cap is hit, the run waits and continues on its own once the window clears. The popup shows a "resumes in…" countdown.
+- **Resilient** — a run survives tab reloads and browser restarts; it picks up where it left off. Just keep (or reopen) an X tab so it has somewhere to run.
+- **Backs off on pushback** — if X returns a 401/403/429, the run pauses (it doesn't crash) and keeps the rest queued. Resume from the popup after a break.
+
+A dot on the toolbar icon shows the state: **green** = blocking, **yellow** = paused. teq never blocks your own account.
+
+---
+
+## Settings
+
+Edit your rules and the auto-collect toggle right in the popup. The full set lives on the **Options** page.
+
+| Setting           | What it does                                               | Default |
+| ----------------- | ---------------------------------------------------------- | ------- |
+| **Words**         | Substrings to match against names/handles (emoji work too) | empty   |
+| **Auto-collect**  | Scan the page for matches automatically as you scroll      | on      |
+| **Scan interval** | Seconds between automatic scans                            | 3       |
+| **Pacing**        | Base seconds between blocks (+ up to 30% jitter)           | 30      |
+| **Max per hour**  | Cap on blocks in any rolling 60 min (`0` = no limit)       | 40      |
+| **Max per day**   | Cap on blocks in any rolling 24 h (`0` = no limit)         | 250     |
+
+Rules sync across your Chrome profile. Your collected list and block log stay on this device (the log keeps the last 500 entries). On the Options page you can **export/import** your config as JSON — handy for backup or sharing rules.
+
+---
+
+## The pages
+
+- **Popup** — edit rules, toggle auto-collect, see the collected count and live run progress, open Review.
+- **Review** — the full-page block screen, injected into X: language filter, select/deselect, and **Block selected**.
+- **Options** — every setting, plus config export/import.
+- **Collected** — search, page through, or clear your collected list.
+- **Blocks** — search, page through, or clear your block log.
+
+---
+
+## Build from source
+
+Built with [Bun](https://bun.sh).
 
 ```sh
 bun install
-bun run build        # → dist/
-bun run watch        # rebuild on change
+bun run build     # → dist/
+bun run watch     # rebuild on change
 bun test
 ```
 
-After a rebuild (`bun run build` / `bun run watch`), hit the **reload** ↻ icon on the extension card in `chrome://extensions` to pick up the new code.
+After rebuilding, click the **reload ↻** icon on the extension card in `chrome://extensions` to load the new code.
 
-## Notes
+---
 
-- Bearer token in `blocker.ts` is x.com's public web-app token, not a secret.
-- Blocking runs from the content script on x.com origin → cookies + ct0 CSRF ride along, exactly like the web app.
-- Collecting reads the page as it's currently rendered — scroll to load more cells and (with auto-collect on) they get picked up on the next scan.
+## Good to know
+
+- Blocks use X's own `blocks/create` API — the exact call the site makes when you click "Block." It runs from the X tab, so your cookies and CSRF token ride along just like the real app.
+- The bearer token in the code is X's public web-app token, not a secret.
+- Collecting only sees what's currently rendered — scroll to load more accounts, and they get picked up on the next scan.
