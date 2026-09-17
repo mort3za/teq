@@ -29,6 +29,7 @@ const en: Dict = {
   "common.next": "Next →",
   "common.pageInfo": "Page {page} of {pages}",
   "common.wordsLabel": "Words / emoji to match (one per line)",
+  "common.tweetWordsLabel": "Phrases to match inside tweets (one per line)",
 
   // popup
   "popup.title": "Teq... block'em!",
@@ -61,6 +62,8 @@ const en: Dict = {
     "When on, the content script scans X for matches automatically. Turn it off to pause collecting without losing your rules.",
   "options.wordsHint":
     "A display name containing any of these (case-insensitive) is collected. Enable \"Also match the @username\" below to match handles too.",
+  "options.tweetWordsHint":
+    "The author of any tweet whose text contains one of these (case-insensitive) is collected. Leave empty to match on names only.",
   "options.language": "Language",
   "options.languageHint": "Language of this extension's interface.",
   "options.persianNormalize": "Match Persian / Arabic letter and digit variants",
@@ -122,6 +125,7 @@ const en: Dict = {
   "review.selectAll": "Select all",
   "review.close": "Close",
   "review.ignore": "Ignore — never collect again",
+  "review.showTweet": "Show the tweet text",
   "review.noMatches": "No matches.",
   "review.nothingCollected": "Nothing collected.",
   "review.blockingBtn": "Blocking…",
@@ -157,6 +161,7 @@ const fa: Dict = {
   "common.next": "بعدی ←",
   "common.pageInfo": "صفحهٔ {page} از {pages}",
   "common.wordsLabel": "کلمات / ایموجی برای تطبیق (هر کدام در یک خط)",
+  "common.tweetWordsLabel": "عبارت‌ها برای تطبیق در متن توییت (هر کدام در یک خط)",
 
   "popup.title": "تک... بلاکشون کن!",
   "popup.autoCollect": "جمع‌آوری خودکار",
@@ -187,6 +192,8 @@ const fa: Dict = {
     "وقتی روشن باشد، اسکریپت محتوا به‌طور خودکار X را برای موارد منطبق اسکن می‌کند. برای توقف جمع‌آوری بدون از دست رفتن قواعد، آن را خاموش کنید.",
   "options.wordsHint":
     "هر نام نمایشی که شامل هر یک از این‌ها باشد (بدون حساسیت به بزرگی/کوچکی) جمع‌آوری می‌شود. برای تطبیق نام کاربری هم، گزینهٔ «تطبیق با @نام‌کاربری» پایین را روشن کنید.",
+  "options.tweetWordsHint":
+    "نویسندهٔ هر توییتی که متنش شامل یکی از این عبارت‌ها باشد (بدون حساسیت به بزرگی/کوچکی) جمع‌آوری می‌شود. برای تطبیق تنها بر اساس نام، خالی بگذارید.",
   "options.language": "زبان",
   "options.languageHint": "زبان رابط کاربری این افزونه.",
   "options.persianNormalize": "تطبیق گونه‌های حروف و ارقام فارسی / عربی",
@@ -244,6 +251,7 @@ const fa: Dict = {
   "review.selectAll": "انتخاب همه",
   "review.close": "بستن",
   "review.ignore": "نادیده بگیر — دیگر جمع‌آوری نشود",
+  "review.showTweet": "نمایش متن توییت",
   "review.noMatches": "موردی یافت نشد.",
   "review.nothingCollected": "چیزی جمع‌آوری نشده.",
   "review.blockingBtn": "در حال مسدودسازی…",

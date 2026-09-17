@@ -7,7 +7,7 @@ beforeAll(() => GlobalRegistrator.register());
 afterAll(() => GlobalRegistrator.unregister());
 
 // Imported after the DOM globals exist.
-const { extractUser, richText } = await import("./extract.ts");
+const { extractUser, richText, tweetTextEl } = await import("./extract.ts");
 const { matchReason } = await import("./matcher.ts");
 
 /** Parse an HTML string and return its first [data-testid="User-Name"] cell. */
@@ -115,4 +115,53 @@ test("handle comes from the profile link, not the status or date links", () => {
   const user = extractUser(buildCell("jane_doe", ["Jane Doe"]))!;
   expect(user.handle).toBe("jane_doe");
   expect(user.name).toBe("Jane Doe");
+});
+
+/**
+ * Build a timeline article: a User-Name cell followed by the tweet body, the
+ * way x.com nests them. `tweetHtml` may contain Twemoji <img alt> tags.
+ */
+function buildArticle(handle: string, tweetHtml: string, lang = "en"): Element {
+  document.body.innerHTML = `
+    <article class="css-175oi2r r-18u37iz" data-testid="tweet">
+      <div data-testid="User-Name" class="r-1wbh5a2">
+        <a href="/${handle}" role="link"><span>Jane Doe</span></a>
+        <a href="/${handle}" role="link" tabindex="-1"><span>@${handle}</span></a>
+      </div>
+      <div data-testid="tweetText" lang="${lang}" dir="auto">${tweetHtml}</div>
+    </article>`;
+  const el = document.querySelector('[data-testid="User-Name"]');
+  if (!el) throw new Error("no User-Name cell in fixture");
+  return el;
+}
+
+test("the tweet body of the cell's own article is found, emoji included", () => {
+  const el = buildArticle(
+    "jane_doe",
+    '<span>Free crypto </span><img alt="🚀" src="https://abs.twimg.com/emoji/v2/svg/1f680.svg" />',
+  );
+  const text = richText(tweetTextEl(el)!).trim();
+  expect(text).toBe("Free crypto 🚀");
+  // A phrase rule matches the tweet text the same way a word rule matches a name.
+  expect(matchReason(text, { words: ["free crypto"] })).toBe("free crypto");
+  expect(matchReason(text, { words: ["🚀"] })).toBe("🚀");
+  expect(matchReason(text, { words: ["airdrop"] })).toBeNull();
+});
+
+test("a cell with no tweet body (e.g. Who to follow) has no tweet text", () => {
+  expect(tweetTextEl(buildCell("jane_doe", ["Jane Doe"]))).toBeNull();
+});
+
+test("a neighbouring article's tweet text is never picked up", () => {
+  document.body.innerHTML = `
+    <article data-testid="tweet">
+      <div data-testid="User-Name"><a href="/first"><span>First</span></a></div>
+      <div data-testid="tweetText" lang="en">first tweet</div>
+    </article>
+    <article data-testid="tweet">
+      <div data-testid="User-Name" id="second"><a href="/second"><span>Second</span></a></div>
+      <div data-testid="tweetText" lang="en">second tweet</div>
+    </article>`;
+  const el = document.getElementById("second")!;
+  expect(richText(tweetTextEl(el)!).trim()).toBe("second tweet");
 });

@@ -19,6 +19,7 @@ import { applyI18n, setLang, t } from "./i18n.ts";
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
 const words = $<HTMLTextAreaElement>("words");
+const tweetWords = $<HTMLTextAreaElement>("tweetWords");
 const autoCollect = $<HTMLInputElement>("autoCollect");
 const errorBox = $<HTMLDivElement>("error");
 const count = $<HTMLElement>("count");
@@ -39,6 +40,7 @@ async function load(): Promise<void> {
   setLang(cfg.lang);
   applyI18n();
   words.value = cfg.words.join("\n");
+  tweetWords.value = cfg.tweetWords.join("\n");
   autoCollect.checked = cfg.autoCollect;
 
   const err = await getLastError();
@@ -158,10 +160,15 @@ async function renderCollected(): Promise<void> {
 }
 
 async function save(): Promise<void> {
-  await setConfig({ words: parseWords(words.value), autoCollect: autoCollect.checked });
+  await setConfig({
+    words: parseWords(words.value),
+    tweetWords: parseWords(tweetWords.value),
+    autoCollect: autoCollect.checked,
+  });
 }
 
 words.addEventListener("input", () => void save());
+tweetWords.addEventListener("input", () => void save());
 autoCollect.addEventListener("change", () => void save());
 
 async function activeXTab(): Promise<chrome.tabs.Tab | null> {

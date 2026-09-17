@@ -3,7 +3,7 @@
 // separate, explicit step driven from the popup.
 
 import { matchReason } from "./matcher.ts";
-import { extractUser } from "./extract.ts";
+import { extractUser, richText, tweetTextEl } from "./extract.ts";
 import { blockUser, BlockError } from "./blocker.ts";
 import { openReview, type BlockProgress } from "./review.ts";
 import { blockDelayMs, capReached, capRetryMs, fmtDuration } from "./pacing.ts";
@@ -63,15 +63,17 @@ function detectOwnHandle(): void {
   if (m) ownHandle = m[1]!.toLowerCase();
 }
 
+// Longest tweet text kept per collected user — it is a reference snippet for
+// the review step, not an archive of the whole (possibly very long) post.
+const TWEET_LIMIT = 500;
+
 /**
- * The language of the tweet this user cell belongs to, read straight from the
- * `lang` attribute X puts on its tweet-text node. Returns undefined when there
- * is no tweet body (e.g. a "Who to follow" cell) or X couldn't determine one.
+ * The language of a tweet, read straight from the `lang` attribute X puts on
+ * its tweet-text node. Returns undefined when there is no tweet body (e.g. a
+ * "Who to follow" cell) or X couldn't determine one.
  */
-function tweetLang(userNameEl: Element): string | undefined {
-  const scope = userNameEl.closest("article") ?? userNameEl.closest('[data-testid="cellInnerDiv"]');
-  const text = scope?.querySelector('[data-testid="tweetText"]');
-  const lang = text?.getAttribute("lang")?.trim();
+function tweetLang(textEl: Element | null): string | undefined {
+  const lang = textEl?.getAttribute("lang")?.trim();
   return lang && lang !== "und" ? lang : undefined;
 }
 
@@ -98,15 +100,29 @@ async function collect(): Promise<number> {
     if (key === ownHandle || existing.has(key)) continue;
     existing.add(key);
 
+    const textEl = tweetTextEl(el);
+    const tweet = textEl ? richText(textEl).trim() : "";
+
     // Match the display name; when the matchHandle option is on, also check the
-    // @username (off by default — display name only).
+    // @username (off by default — display name only). Separately, the tweet
+    // phrases are matched against the text of the tweet this cell belongs to.
     const opts = { words: cfg.words, normalize: cfg.persianNormalize };
     const reason =
       matchReason(user.name, opts) ??
-      (cfg.matchHandle ? matchReason(user.handle, opts) : null);
+      (cfg.matchHandle ? matchReason(user.handle, opts) : null) ??
+      (tweet ? matchReason(tweet, { words: cfg.tweetWords, normalize: cfg.persianNormalize }) : null);
     if (!reason) continue;
 
-    found.push({ handle: user.handle, name: user.name, reason, lang: tweetLang(el) });
+    const match: CollectedUser = {
+      handle: user.handle,
+      name: user.name,
+      reason,
+      lang: tweetLang(textEl),
+    };
+    // Kept for every match (not just tweet matches) — it is the context the
+    // review step shows behind the info button.
+    if (tweet) match.tweet = tweet.slice(0, TWEET_LIMIT);
+    found.push(match);
   }
 
   if (found.length) await addCollected(found);

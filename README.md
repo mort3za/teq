@@ -29,6 +29,8 @@ The teq icon appears in your toolbar. You're ready.
 
 **1. Set your rules.** Click the toolbar icon and add words or emoji — one per line. A match is a case-insensitive substring, checked against the display name (and the @handle too, if you enable **Match @username** in Options).
 
+**1b. Or match what they post.** Add whole phrases — one per line — to **Phrases to match inside tweets**. The author of any tweet whose text contains one of them is collected too, and the tweet itself is kept as a reference.
+
 **2. Browse X.** Leave auto-collect on (the default) and just scroll. teq scans the page every few seconds and adds matching accounts to your **collected list**. No clicking required.
 
 **3. Review and block.** Open **Review** from the popup for a full-page list of everyone collected. Filter by language, deselect anyone you want to keep, then hit **Block selected**. teq blocks them one by one in the background — keep the X tab open and watch the progress.
@@ -58,6 +60,7 @@ Edit your rules and the auto-collect toggle right in the popup. The full set liv
 | Setting           | What it does                                               | Default |
 | ----------------- | ---------------------------------------------------------- | ------- |
 | **Words**         | Substrings to match against display names (emoji work too) | empty   |
+| **Tweet phrases** | Phrases to match inside tweet text; the tweet's author is collected | empty |
 | **Auto-collect**  | Scan the page for matches automatically as you scroll      | on      |
 | **Scan interval** | Seconds between automatic scans                            | 3       |
 | **Pacing**        | Base seconds between blocks (+ up to 30% jitter)           | 30      |
@@ -76,7 +79,7 @@ Rules sync across your Chrome profile. Your collected list and block log stay on
 ## The pages
 
 - **Popup** — edit rules, toggle auto-collect, see the collected count and live run progress, open Review.
-- **Review** — the full-page block screen, injected into X: language filter, select/deselect, and **Block selected**.
+- **Review** — the full-page block screen, injected into X: language filter, select/deselect, an ℹ button that opens the tweet an account was collected from, and **Block selected**.
 - **Options** — every setting, plus config export/import.
 - **Collected** — search, page through, or clear your collected list.
 - **Blocks** — search, page through, or clear your block log.

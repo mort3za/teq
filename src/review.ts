@@ -80,10 +80,18 @@ const STYLE = `
     align-content: start;
   }
   .cell {
-    display: flex; align-items: center; gap: 8px;
+    display: flex; flex-direction: column; gap: 6px;
     padding: 6px 8px; border-radius: 8px; background: #f7f9f9;
     min-width: 0;
   }
+  .row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .tweet {
+    margin: 0; font-size: 12px; line-height: 1.5; color: #536471;
+    white-space: pre-wrap; overflow-wrap: anywhere;
+    max-height: 9em; overflow-y: auto;
+    border-top: 1px solid rgba(0,0,0,.08); padding-top: 6px;
+  }
+  .tweet[hidden] { display: none; }
   .cell label {
     display: flex; align-items: center; gap: 8px;
     flex: 1; min-width: 0; cursor: pointer;
@@ -99,6 +107,7 @@ const STYLE = `
     color: #536471; font-size: 14px; padding: 2px 4px; border-radius: 4px;
   }
   .icon-btn:hover { background: rgba(244,33,46,.12); color: #f4212e; }
+  .info-btn:hover { background: rgba(29,155,240,.14); color: #1d9bf0; }
   .empty { padding: 40px; text-align: center; color: #536471; }
   .btn {
     border: 0; border-radius: 9999px; padding: 8px 18px;
@@ -120,6 +129,7 @@ const STYLE = `
     .cell { background: #1e2a36; }
     .cell:hover { background: #243340; }
     .icon-btn { color: #8b98a5; }
+    .tweet { color: #8b98a5; border-color: rgba(255,255,255,.12); }
     .lang-sel, .search { background: #1e2a36; border-color: #38444d; }
     .status { color: #8b98a5; }
   }
@@ -251,7 +261,34 @@ function cell(u: CollectedUser): HTMLDivElement {
     await refresh();
   });
 
-  el.append(label, rm);
+  const row = document.createElement("div");
+  row.className = "row";
+  row.append(label);
+  el.append(row);
+
+  // The tweet this user was collected from, folded away behind an info button:
+  // most decisions are made on the name alone, and open tweets would swamp the
+  // grid.
+  if (u.tweet) {
+    const tweet = document.createElement("p");
+    tweet.className = "tweet";
+    tweet.dir = "auto"; // follow the tweet's own direction, not the overlay's
+    tweet.textContent = u.tweet;
+    tweet.hidden = true;
+
+    const info = document.createElement("button");
+    info.className = "icon-btn info-btn";
+    info.title = t("review.showTweet");
+    info.textContent = "ℹ";
+    info.addEventListener("click", () => {
+      tweet.hidden = !tweet.hidden;
+    });
+
+    row.append(info);
+    el.append(tweet);
+  }
+
+  row.append(rm);
   return el;
 }
 

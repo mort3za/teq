@@ -10,6 +10,7 @@ import { applyI18n, setLang, t, type Lang } from "./i18n.ts";
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
 const wordsEl = $<HTMLTextAreaElement>("words");
+const tweetWordsEl = $<HTMLTextAreaElement>("tweetWords");
 const autoCollect = $<HTMLInputElement>("autoCollect");
 const langEl = $<HTMLSelectElement>("lang");
 const persianNormalize = $<HTMLInputElement>("persianNormalize");
@@ -36,6 +37,7 @@ async function load(): Promise<void> {
   persianNormalize.checked = cfg.persianNormalize;
   matchHandle.checked = cfg.matchHandle;
   wordsEl.value = cfg.words.join("\n");
+  tweetWordsEl.value = cfg.tweetWords.join("\n");
   autoCollect.checked = cfg.autoCollect;
   scan.value = String(cfg.scanSeconds);
   pacing.value = String(cfg.pacingSeconds);
@@ -70,6 +72,7 @@ async function save(): Promise<void> {
   maxPerDay.value = String(perDay);
   await setConfig({
     words: parseWords(wordsEl.value),
+    tweetWords: parseWords(tweetWordsEl.value),
     autoCollect: autoCollect.checked,
     persianNormalize: persianNormalize.checked,
     matchHandle: matchHandle.checked,
@@ -93,6 +96,7 @@ langEl.addEventListener("change", () => void changeLang());
 persianNormalize.addEventListener("change", () => void save());
 matchHandle.addEventListener("change", () => void save());
 wordsEl.addEventListener("input", () => void save());
+tweetWordsEl.addEventListener("input", () => void save());
 autoCollect.addEventListener("change", () => void save());
 scan.addEventListener("change", () => void save());
 pacing.addEventListener("change", () => void save());
@@ -138,6 +142,9 @@ importBtn.addEventListener("click", () => {
     const patch: Partial<Config> = {};
     if (Array.isArray(data.words)) {
       patch.words = data.words.map(String);
+    }
+    if (Array.isArray(data.tweetWords)) {
+      patch.tweetWords = data.tweetWords.map(String);
     }
     if (typeof data.autoCollect === "boolean") {
       patch.autoCollect = data.autoCollect;

@@ -67,6 +67,12 @@
         </div>
 
         <div class="field">
+          <label for="tweetWords" data-i18n="common.tweetWordsLabel">Phrases to match inside tweets (one per line)</label>
+          <textarea id="tweetWords" rows="8" placeholder="free crypto&#10;dm me for&#10;🚀🚀"></textarea>
+          <p class="hint" data-i18n="options.tweetWordsHint">The author of any tweet whose text contains one of these (case-insensitive) is collected. Leave empty to match on names only.</p>
+        </div>
+
+        <div class="field">
           <label class="switch-field">
             <span class="switch">
               <input id="persianNormalize" type="checkbox" />

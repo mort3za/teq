@@ -29,6 +29,16 @@ export function richText(el: Element): string {
   return out;
 }
 
+/**
+ * The tweet-text node of the tweet a user cell belongs to, or null when the
+ * cell isn't part of one (e.g. a "Who to follow" cell). Scoped to the enclosing
+ * article so a neighbouring tweet's text is never picked up.
+ */
+export function tweetTextEl(userNameEl: Element): Element | null {
+  const scope = userNameEl.closest("article") ?? userNameEl.closest('[data-testid="cellInnerDiv"]');
+  return scope?.querySelector('[data-testid="tweetText"]') ?? null;
+}
+
 /** Extract { handle, name } from a [data-testid="User-Name"] container. */
 export function extractUser(el: Element): { handle: string; name: string } | null {
   let handle = "";

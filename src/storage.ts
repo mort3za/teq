@@ -7,6 +7,9 @@ import { type Lang, detectLang } from "./i18n.ts";
 export interface Config {
   /** Case-insensitive substrings; a display name containing any of these matches. */
   words: string[];
+  /** Case-insensitive phrases matched against the text of the tweet a user cell
+   * belongs to; the tweet's author is collected when any of them appears. */
+  tweetWords: string[];
   /** When true, the content script auto-scans the page for matches on an interval. */
   autoCollect: boolean;
   /** Seconds between automatic page scans for new matches. */
@@ -32,6 +35,7 @@ export interface Config {
 
 export const DEFAULT_CONFIG: Config = {
   words: [],
+  tweetWords: [],
   autoCollect: true,
   scanSeconds: 3,
   pacingSeconds: 30,
@@ -52,6 +56,10 @@ export interface CollectedUser {
    * attribute (e.g. "en", "fa", "ja"). Absent when there was no tweet text or
    * X reported "und" (undetermined). */
   lang?: string;
+  /** Text of the tweet the user was collected from, kept as a reference so the
+   * review step can show why they showed up. Trimmed to TWEET_LIMIT characters;
+   * absent when the cell had no tweet body (e.g. a "Who to follow" cell). */
+  tweet?: string;
   /** True while this user is queued for / being blocked — shown as "in progress"
    * in the collected list. Cleared when a block run ends; the user is dropped
    * from the list entirely once the block is confirmed. */
