@@ -58,6 +58,14 @@ export interface CollectedUser {
   blocking?: boolean;
 }
 
+/** An account dismissed with "✕" in review: never collected again. */
+export interface IgnoredUser {
+  handle: string;
+  name: string;
+  /** epoch ms */
+  at: number;
+}
+
 /** Live status of a block run, persisted so any view (popup, modal) can show it. */
 export interface BlockProgress {
   /** Users successfully blocked so far. */
@@ -87,6 +95,7 @@ const ERROR_KEY = "lastError";
 const COLLECTED_KEY = "collected";
 const PROGRESS_KEY = "blockProgress";
 const QUEUE_KEY = "blockQueue";
+const IGNORED_KEY = "ignored";
 const LOG_LIMIT = 500;
 
 export async function getConfig(): Promise<Config> {
@@ -169,6 +178,30 @@ export async function clearBlocking(): Promise<void> {
 
 export async function clearCollected(): Promise<void> {
   await chrome.storage.local.set({ [COLLECTED_KEY]: [] });
+}
+
+export async function getIgnored(): Promise<IgnoredUser[]> {
+  const { [IGNORED_KEY]: i } = await chrome.storage.local.get(IGNORED_KEY);
+  return (i as IgnoredUser[] | undefined) ?? [];
+}
+
+/** Add a user to the ignore list; a handle already there is left as it was. */
+export async function addIgnored(user: IgnoredUser): Promise<void> {
+  const list = await getIgnored();
+  const key = user.handle.toLowerCase();
+  if (list.some((u) => u.handle.toLowerCase() === key)) return;
+  list.push(user);
+  await chrome.storage.local.set({ [IGNORED_KEY]: list });
+}
+
+export async function removeIgnored(handle: string): Promise<void> {
+  const key = handle.toLowerCase();
+  const next = (await getIgnored()).filter((u) => u.handle.toLowerCase() !== key);
+  await chrome.storage.local.set({ [IGNORED_KEY]: next });
+}
+
+export async function clearIgnored(): Promise<void> {
+  await chrome.storage.local.set({ [IGNORED_KEY]: [] });
 }
 
 /** Last block run's progress, or null when no run has happened yet. */

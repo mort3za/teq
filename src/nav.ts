@@ -1,7 +1,7 @@
 // Sidebar: keep the "(N)" badges in front of the Collected and Blocked nav links
 // in sync with their counts. Shared by every page that renders the sidebar.
 
-import { getCollected, getLog } from "./storage.ts";
+import { getCollected, getIgnored, getLog } from "./storage.ts";
 
 function setBadge(id: string, n: number): void {
   const el = document.getElementById(id);
@@ -10,6 +10,10 @@ function setBadge(id: string, n: number): void {
 
 async function syncCollected(): Promise<void> {
   setBadge("navCount", (await getCollected()).length);
+}
+
+async function syncIgnored(): Promise<void> {
+  setBadge("navCountIgnored", (await getIgnored()).length);
 }
 
 async function syncBlocked(): Promise<void> {
@@ -21,10 +25,12 @@ async function syncBlocked(): Promise<void> {
 /** Render the counts now and refresh them whenever their lists change. */
 export function watchNavCount(): void {
   void syncCollected();
+  void syncIgnored();
   void syncBlocked();
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== "local") return;
     if (changes.collected) void syncCollected();
+    if (changes.ignored) void syncIgnored();
     if (changes.blockLog) void syncBlocked();
   });
 }

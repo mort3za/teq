@@ -3,7 +3,7 @@
 // grid that fits many collected users at once. Style-isolated in a Shadow DOM
 // so X's CSS can't reach in and ours can't leak out.
 
-import { getCollected, getConfig, removeCollected, type CollectedUser, type BlockProgress } from "./storage.ts";
+import { getCollected, getConfig, removeCollected, addIgnored, type CollectedUser, type BlockProgress } from "./storage.ts";
 import { langName, langOptions } from "./lang.ts";
 import { getLang, isRtl, setLang, t, type Lang } from "./i18n.ts";
 
@@ -31,6 +31,13 @@ let searchTerm = "";
 // True while a paced block run is in progress (modal stays open to show it).
 let blocking = false;
 let onBlock: (handles: string[], onProgress: (p: BlockProgress) => void) => void = () => {};
+
+/** Collected users still waiting for a decision, newest first. Anyone already
+ * queued for blocking is left out — they were confirmed in an earlier round and
+ * showing them again (blocks are paced minutes apart) invites a double take. */
+async function pending(): Promise<CollectedUser[]> {
+  return [...(await getCollected())].reverse().filter((u) => !u.blocking);
+}
 
 /** Users matching the active language filter and search term. */
 function visible(): CollectedUser[] {
@@ -231,12 +238,15 @@ function cell(u: CollectedUser): HTMLDivElement {
   who.append(name, handle);
   label.append(cb, who);
 
+  // "✕" is a permanent dismissal: the user goes on the ignore list so a later
+  // scan never collects them again.
   const rm = document.createElement("button");
   rm.className = "icon-btn";
-  rm.title = t("common.remove");
+  rm.title = t("review.ignore");
   rm.textContent = "✕";
   rm.addEventListener("click", async () => {
     selected.delete(key);
+    await addIgnored({ handle: u.handle, name: u.name, at: Date.now() });
     await removeCollected(u.handle);
     await refresh();
   });
@@ -285,7 +295,7 @@ function render(): void {
 
 /** Reload from storage (drops selections for users no longer present). */
 async function refresh(): Promise<void> {
-  collected = [...(await getCollected())].reverse();
+  collected = await pending();
   const present = new Set(collected.map((u) => u.handle.toLowerCase()));
   selected = new Set([...selected].filter((k) => present.has(k)));
   render();
@@ -346,7 +356,7 @@ export async function openReview(
   if (statusEl) statusEl.textContent = "";
   searchTerm = "";
   if (searchEl) searchEl.value = "";
-  collected = [...(await getCollected())].reverse();
+  collected = await pending();
   selected = new Set(collected.map((u) => u.handle.toLowerCase()));
   render();
 }

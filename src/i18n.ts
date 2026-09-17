@@ -13,6 +13,7 @@ const en: Dict = {
   // nav (shared sidebar)
   "nav.blocked": "Blocked",
   "nav.collected": "Collected",
+  "nav.ignored": "Ignored",
   "nav.options": "Options",
 
   // shared
@@ -104,6 +105,12 @@ const en: Dict = {
   "collected.importNoHandle": 'Import failed: CSV needs a "handle" column.',
   "collected.importNoRows": "Import failed: no rows with a handle found.",
 
+  // ignored page
+  "ignored.title": "Ignored accounts",
+  "ignored.note": "These accounts are never collected again. Remove one to collect it as usual.",
+  "ignored.empty": "Nothing ignored yet.",
+  "ignored.confirmClear": "Clear the entire ignore list? This can't be undone.",
+
   // blocks page
   "blocks.title": "Blocked accounts",
   "blocks.empty": "No blocked accounts yet.",
@@ -114,6 +121,7 @@ const en: Dict = {
   "review.searchPlaceholder": "Search name or @handle",
   "review.selectAll": "Select all",
   "review.close": "Close",
+  "review.ignore": "Ignore — never collect again",
   "review.noMatches": "No matches.",
   "review.nothingCollected": "Nothing collected.",
   "review.blockingBtn": "Blocking…",
@@ -222,6 +230,11 @@ const fa: Dict = {
   "collected.importNoHandle": "ورود ناموفق: فایل CSV به ستون «handle» نیاز دارد.",
   "collected.importNoRows": "ورود ناموفق: هیچ ردیفی با نام کاربری یافت نشد.",
 
+  "ignored.title": "حساب‌های نادیده‌گرفته‌شده",
+  "ignored.note": "این حساب‌ها دیگر هرگز جمع‌آوری نمی‌شوند. برای جمع‌آوری دوباره، مورد را حذف کنید.",
+  "ignored.empty": "هنوز چیزی نادیده گرفته نشده.",
+  "ignored.confirmClear": "کل فهرست نادیده‌گرفته‌شده پاک شود؟ این کار قابل بازگشت نیست.",
+
   "blocks.title": "حساب‌های مسدودشده",
   "blocks.empty": "هنوز حسابی مسدود نشده.",
   "blocks.confirmClear": "کل فهرست حساب‌های مسدودشده پاک شود؟ این کار قابل بازگشت نیست.",
@@ -230,6 +243,7 @@ const fa: Dict = {
   "review.searchPlaceholder": "جستجوی نام یا @نام‌کاربری",
   "review.selectAll": "انتخاب همه",
   "review.close": "بستن",
+  "review.ignore": "نادیده بگیر — دیگر جمع‌آوری نشود",
   "review.noMatches": "موردی یافت نشد.",
   "review.nothingCollected": "چیزی جمع‌آوری نشده.",
   "review.blockingBtn": "در حال مسدودسازی…",

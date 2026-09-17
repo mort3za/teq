@@ -12,6 +12,7 @@ import {
   getConfig,
   DEFAULT_CONFIG,
   getCollected,
+  getIgnored,
   addCollected,
   removeCollected,
   setBlocking,
@@ -80,12 +81,13 @@ function tweetLang(userNameEl: Element): string | undefined {
  */
 async function collect(): Promise<number> {
   const cfg = await getConfig();
-  // Skip anyone already collected or already blocked (logged) — re-collecting a
-  // blocked user would put them back in the review queue.
+  // Skip anyone already collected, already blocked (logged), or ignored —
+  // re-collecting any of them would put them back in the review queue.
   const existing = new Set(
     (await getCollected()).map((u) => u.handle.toLowerCase()),
   );
   for (const e of await getLog()) existing.add(e.handle.toLowerCase());
+  for (const u of await getIgnored()) existing.add(u.handle.toLowerCase());
   const found: CollectedUser[] = [];
 
   for (const el of document.querySelectorAll('[data-testid="User-Name"]')) {
