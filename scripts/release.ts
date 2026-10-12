@@ -1,69 +1,80 @@
 #!/usr/bin/env bun
-// Bump the version, sync it into package.json + manifest.json, commit, tag, and
-// push. The new tag triggers .github/workflows/release.yml to build & publish.
+// Makes a new release: offers to commit uncommitted changes, bumps the version in package.json
+// and manifest.json, asks Claude Code to write release notes from the commits since the last
+// tag, then commits, tags and pushes. The tag push starts .github/workflows/release.yml, which
+// builds the zip and makes the GitHub release.
 //
-//   bun run release            # patch bump (default): 1.0.2 -> 1.0.3
-//   bun run release minor      # 1.0.2 -> 1.1.0
-//   bun run release major      # 1.0.2 -> 2.0.0
-//   bun run release 1.5.0      # explicit version
-//
-// The base version is the highest existing git tag (the last real release), so
-// it can't collide with a tag that already exists.
+//   bun run release patch|minor|major
 
 import { $ } from "bun";
+import { tmpdir } from "node:os";
 
+const BUMPS = ["patch", "minor", "major"];
 const VERSION_FILES = ["package.json", "manifest.json"];
-const SEMVER = /^v?(\d+)\.(\d+)\.(\d+)$/;
 
-async function latestTagVersion(): Promise<[number, number, number]> {
-  const out = await $`git tag --list --sort=-v:refname`.text();
-  for (const tag of out.split("\n")) {
-    const m = tag.trim().match(SEMVER);
-    if (m) return [Number(m[1]), Number(m[2]), Number(m[3])];
-  }
-  return [0, 0, 0]; // no tags yet
-}
-
-function nextVersion(arg: string, [maj, min, pat]: [number, number, number]): string {
-  switch (arg) {
-    case "major": return `${maj + 1}.0.0`;
-    case "minor": return `${maj}.${min + 1}.0`;
-    case "patch": return `${maj}.${min}.${pat + 1}`;
-    default: {
-      const m = arg.match(SEMVER);
-      if (!m) throw new Error(`Invalid version "${arg}" — use major|minor|patch or X.Y.Z`);
-      return `${m[1]}.${m[2]}.${m[3]}`;
-    }
-  }
-}
-
-// Refuse to release on top of uncommitted changes — they'd be swept into the
-// release commit.
-const status = (await $`git status --porcelain`.text()).trim();
-if (status) {
-  console.error("Working tree is not clean. Commit or stash first:\n" + status);
+function fail(message: string): never {
+  console.error(message);
   process.exit(1);
 }
 
-const branch = (await $`git rev-parse --abbrev-ref HEAD`.text()).trim();
-const version = nextVersion(Bun.argv[2] ?? "patch", await latestTagVersion());
+const bump = process.argv[2] ?? "";
+if (!BUMPS.includes(bump)) fail("Usage: bun run release patch|minor|major");
+
+if ((await $`git branch --show-current`.text()).trim() !== "main") fail("Switch to main first.");
+
+const dirty = async () => (await $`git status --porcelain`.text()).trim();
+if (await dirty()) {
+  await $`git status --short`;
+  // globalThis: the release notes code below has its own `prompt` const.
+  const answer = globalThis.prompt("Commit these changes, then release? [Y/n]") ?? "";
+  if (/^n/i.test(answer)) fail("Canceled.");
+  await $`claude -p /my-commit-general --allowedTools Agent ${"Bash(git *)"}`;
+  if (await dirty()) fail("Some changes are still not committed. Commit or stash them first.");
+}
+await $`git pull --ff-only`;
+
+// Stop before anything is pushed, because a failed check in CI leaves a tag with no release.
+await $`bun run typecheck`;
+await $`bun test`;
+
+const pkg = await Bun.file("package.json").json();
+const [major = 0, minor = 0, patch = 0] = String(pkg.version).split(".").map(Number);
+const version =
+  bump === "major"
+    ? `${major + 1}.0.0`
+    : bump === "minor"
+      ? `${major}.${minor + 1}.0`
+      : `${major}.${minor}.${patch + 1}`;
 const tag = `v${version}`;
 
-if ((await $`git tag --list ${tag}`.text()).trim()) {
-  console.error(`Tag ${tag} already exists.`);
-  process.exit(1);
-}
+const lastTag = await $`git describe --tags --abbrev=0`.quiet().nothrow();
+const range = lastTag.exitCode === 0 ? `${lastTag.text().trim()}..HEAD` : "HEAD";
+const format = "--format=- %s%n%b";
+const commits = await $`git log ${range} --no-merges ${format}`.text();
+
+console.log(`Writing release notes for ${tag}...`);
+const prompt = `Write the GitHub release notes for ${tag} of Teq, a Chrome extension that finds X (Twitter) accounts whose name or tweets match the user's rules, and blocks the ones the user selects. The git commits since the last release are on stdin.
+- Write for users, not developers. Leave out refactors, tooling and other internal changes.
+- Use Markdown "### Features", "### Fixes" and "### Other" sections with short bullet points. Leave out empty sections.
+- Output only the notes: no title, no version, no text before or after.`;
+const notes = (
+  await $`claude -p --tools ${""} --no-session-persistence ${prompt} < ${new Response(commits)}`.text()
+).trim();
+if (!notes) fail("Claude returned no release notes.");
+console.log(`\n${notes}\n`);
 
 for (const file of VERSION_FILES) {
   const json = await Bun.file(file).json();
   json.version = version;
   await Bun.write(file, JSON.stringify(json, null, 2) + "\n");
 }
+const notesFile = `${tmpdir()}/teq-${tag}.md`;
+await Bun.write(notesFile, notes + "\n");
 
-console.log(`Releasing ${tag} (from branch ${branch}) …`);
-await $`git add ${VERSION_FILES}`;
-await $`git commit -m ${`release: ${tag}`}`;
-await $`git tag -a ${tag} -m ${`release: ${tag}`}`;
-await $`git push origin ${branch}`;
-await $`git push origin ${tag}`;
-console.log(`Pushed ${tag}. CI will build & publish the release.`);
+await $`git commit -m ${`release: ${tag}`} ${VERSION_FILES}`;
+// verbatim: the default cleanup removes lines that start with "#", which are Markdown headings here.
+await $`git tag -a ${tag} -F ${notesFile} --cleanup=verbatim`;
+await $`git push --atomic origin main ${tag}`;
+
+console.log(`\nPushed ${tag}. GitHub Actions now builds the zip and makes the release:`);
+console.log("https://github.com/mort3za/teq/actions");

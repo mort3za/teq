@@ -12,6 +12,7 @@
   "scripts": {
     "build": "bun run build.ts",
     "watch": "bun run build.ts --watch",
+    "typecheck": "tsc --noEmit",
     "test": "bun test",
     "release": "bun run scripts/release.ts"
   },
