@@ -1,40 +1,56 @@
-name: Build & Release
+# Runs only when a version tag (v1.2.3) is pushed. Normal pushes do not start it.
+name: Release
 
 on:
   push:
     tags: ["v*"]
 
+permissions:
+  contents: write
+
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
+
+      # actions/checkout replaces an annotated tag with a lightweight one.
+      # Fetch the real tag again, so that the tag message is available.
+      - run: git fetch --force origin "$GITHUB_REF:$GITHUB_REF"
 
       - uses: oven-sh/setup-bun@v2
 
       - run: bun install --frozen-lockfile
 
-      - run: bun test
-
-      - name: Stamp version from tag into manifest.json
+      # scripts/release.ts bumps both files, so the tag must match both.
+      - name: Check tag matches package.json and manifest.json versions
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          bun --eval "
-            const m = await Bun.file('manifest.json').json();
-            m.version = '$VERSION';
-            await Bun.write('manifest.json', JSON.stringify(m, null, 2) + '\n');
-          "
-          echo "manifest.json version -> $VERSION"
+          for file in package.json manifest.json; do
+            version="$(jq -r .version "$file")"
+            if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+              echo "::error::Tag $GITHUB_REF_NAME does not match $file version $version"
+              exit 1
+            fi
+          done
 
+      - run: bun run typecheck
+      - run: bun test
       - run: bun run build
 
-      - name: Zip the extension
-        run: cd dist && zip -r "../teq-${{ github.ref_name }}.zip" .
+      # The unpacked zip keeps the manifest "key", so users who load it unpacked keep the same
+      # extension ID (and their data) across updates. The Chrome Web Store does not accept a
+      # "key" field, so the store zip has it removed.
+      - name: Zip dist
+        run: |
+          (cd dist && zip -r "../teq-$GITHUB_REF_NAME.zip" .)
+          jq 'del(.key)' dist/manifest.json > dist/manifest.tmp && mv dist/manifest.tmp dist/manifest.json
+          (cd dist && zip -r "../teq-$GITHUB_REF_NAME-webstore.zip" .)
 
-      - name: Publish release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: teq-${{ github.ref_name }}.zip
-          generate_release_notes: true
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "teq-$GITHUB_REF_NAME.zip" "teq-$GITHUB_REF_NAME-webstore.zip" \
+            --title "$GITHUB_REF_NAME" \
+            --notes-from-tag \
+            --verify-tag
