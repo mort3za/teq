@@ -41,7 +41,7 @@ The [X privacy policy](https://x.com/en/privacy) applies.
 
 ### Google Fonts
 
-The extension pages (popup, Options, Collected, Blocked, Ignored) load the Vazirmatn font from Google Fonts (`fonts.googleapis.com`, `fonts.gstatic.com`). Google gets your IP address with these requests. Teq sends no other data to Google Fonts. The [Google privacy policy](https://policies.google.com/privacy) applies.
+The extension pages (popup, Options, Collected, Blocked, Ignored, Credits, Donate) load the Vazirmatn font from Google Fonts (`fonts.googleapis.com`, `fonts.gstatic.com`). Google gets your IP address with these requests. Teq sends no other data to Google Fonts. The [Google privacy policy](https://policies.google.com/privacy) applies.
 
 Teq does not send your name, e-mail, browser history or other pages to anyone.
 
