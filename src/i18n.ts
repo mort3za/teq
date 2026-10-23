@@ -16,7 +16,7 @@ const en: Dict = {
   "nav.ignored": "Ignored",
   "nav.options": "Options",
   "nav.credits": "Credits",
-  "nav.donate": "Donate",
+  "nav.donate": "Support Teq",
 
   // shared
   "common.total": "total",
