@@ -6,19 +6,21 @@ import {
   addCollected,
   removeCollected,
   clearCollected,
+  addIgnored,
   type CollectedUser,
 } from "./storage.ts";
 import { langName, langOptions } from "./lang.ts";
 import { toCsv, parseCsv, downloadCsv, pickCsv } from "./csv.ts";
 import { watchNavCount } from "./nav.ts";
 import { applyI18n, setLang, t } from "./i18n.ts";
-import { X_ICON } from "./icons.ts";
+import { X_ICON, EYE_OFF_ICON } from "./icons.ts";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
 const countEl = $<HTMLElement>("count");
 const searchEl = $<HTMLInputElement>("search");
 const langEl = $<HTMLSelectElement>("lang");
+const statusEl = $<HTMLSelectElement>("status");
 const listEl = $<HTMLUListElement>("list");
 const emptyEl = $<HTMLParagraphElement>("empty");
 const pagerEl = $<HTMLElement>("pager");
@@ -37,8 +39,11 @@ let page = 0;
 function filtered(): CollectedUser[] {
   const q = searchEl.value.trim().toLowerCase();
   const lang = langEl.value;
+  const status = statusEl.value;
   return users.filter((u) => {
     if (lang && u.lang !== lang) return false;
+    if (status === "blocking" && !u.blocking) return false;
+    if (status === "review" && u.blocking) return false;
     if (!q) return true;
     return (
       u.handle.toLowerCase().includes(q) || u.name.toLowerCase().includes(q)
@@ -67,7 +72,7 @@ function render(): void {
   listEl.replaceChildren(
     ...slice.map((u) => {
       const li = document.createElement("li");
-      li.className = "has-remove";
+      li.className = "has-remove has-ignore";
 
       const link = document.createElement("a");
       link.className = "handle";
@@ -105,7 +110,21 @@ function render(): void {
         await load();
       });
 
-      li.append(link, name, meta, rm);
+      // Same as review's "✕": the user goes on the ignore list so a later scan
+      // never collects them again.
+      const ig = document.createElement("button");
+      ig.type = "button";
+      ig.className = "icon-btn ignore";
+      ig.title = t("collected.ignore");
+      ig.setAttribute("aria-label", t("collected.ignore"));
+      ig.innerHTML = EYE_OFF_ICON;
+      ig.addEventListener("click", async () => {
+        await addIgnored({ handle: u.handle, name: u.name, at: Date.now() });
+        await removeCollected(u.handle);
+        await load();
+      });
+
+      li.append(link, name, meta, ig, rm);
       return li;
     }),
   );
@@ -133,6 +152,11 @@ searchEl.addEventListener("input", () => {
 });
 
 langEl.addEventListener("change", () => {
+  page = 0;
+  render();
+});
+
+statusEl.addEventListener("change", () => {
   page = 0;
   render();
 });

@@ -132,6 +132,7 @@ h1 {
 .pager button,
 #search,
 #lang,
+#status,
 .field input[type="number"],
 .field select {
   box-sizing: border-box;
@@ -214,6 +215,7 @@ h1 {
 }
 
 #lang,
+#status,
 .field select {
   flex: none;
   padding-inline-end: 36px; /* room for the chevron (theme.css) */
@@ -237,16 +239,18 @@ h1 {
 /* A select moves its text by only half its top padding (measured), so it
    needs about twice the shift to line up with the inputs. */
 #lang,
+#status,
 .field select {
   padding-top: 5px;
 }
 
-:lang(fa) :is(#lang, .field select) {
+:lang(fa) :is(#lang, #status, .field select) {
   padding-top: 6px;
 }
 
 #search:focus,
 #lang:focus,
+#status:focus,
 .field select:focus {
   outline: none;
   border-color: var(--accent);
@@ -269,6 +273,10 @@ h1 {
 
 .list li.has-remove {
   grid-template-columns: 1fr auto auto;
+}
+
+.list li.has-ignore {
+  grid-template-columns: 1fr auto auto auto;
 }
 
 /* Square button holding one SVG icon; every one hovers the same way. */
@@ -296,6 +304,16 @@ h1 {
   grid-column: 3;
   grid-row: 1 / span 2;
   align-self: center;
+}
+
+.has-ignore .ignore {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+
+.has-ignore .remove {
+  grid-column: 4;
 }
 
 .handle {
