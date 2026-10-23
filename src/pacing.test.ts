@@ -1,5 +1,6 @@
 import { test, expect } from "bun:test";
 import { blockDelayMs, PACING_JITTER, capReached, capRetryMs, fmtDuration, scrollDelayMs, SCROLL_MIN_MS, SCROLL_MAX_MS, rateLimitUntil, RATE_LIMIT_MS } from "./pacing.ts";
+
 test("with zero jitter the delay is exactly the configured pacing", () => {
   expect(blockDelayMs(30, 0)).toBe(30_000);
   expect(blockDelayMs(5, 0)).toBe(5_000);
