@@ -31,6 +31,12 @@ export interface Config {
   /** Also match against the @username, not just the display name (off by
    * default — display name only). */
   matchHandle: boolean;
+  /** Show the popup's Auto-scroll button (off by default — opt-in from the
+   * Options page's Advanced section, with a warning). */
+  autoScroll: boolean;
+  /** An auto-scroll run stops once it has collected this many fresh matches
+   * (0 = no limit). Caps how long one run keeps X loading more. */
+  scrollMaxFound: number;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -44,6 +50,8 @@ export const DEFAULT_CONFIG: Config = {
   lang: detectLang(),
   persianNormalize: false,
   matchHandle: false,
+  autoScroll: false,
+  scrollMaxFound: 500,
 };
 
 /** A matched user waiting to be reviewed and blocked. */

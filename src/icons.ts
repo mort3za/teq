@@ -13,3 +13,5 @@ export const BAN_ICON = svg(16, '<circle cx="12" cy="12" r="10"/><path d="m4.9 4
 export const SQUARE_CHECK_ICON = svg(16, '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/>');
 export const SQUARE_MINUS_ICON = svg(16, '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 12h8"/>');
 export const PLAY_ICON = svg(14, '<path d="M6 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 6 4.5z" fill="currentColor"/>');
+export const CHEVRONS_DOWN_ICON = svg(16, '<path d="m7 6 5 5 5-5"/><path d="m7 13 5 5 5-5"/>');
+export const STOP_ICON = svg(14, '<rect x="5" y="5" width="14" height="14" rx="2" fill="currentColor"/>');

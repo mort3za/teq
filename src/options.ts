@@ -15,10 +15,12 @@ const autoCollect = $<HTMLInputElement>("autoCollect");
 const langEl = $<HTMLSelectElement>("lang");
 const persianNormalize = $<HTMLInputElement>("persianNormalize");
 const matchHandle = $<HTMLInputElement>("matchHandle");
+const autoScroll = $<HTMLInputElement>("autoScroll");
 const scan = $<HTMLInputElement>("scan");
 const pacing = $<HTMLInputElement>("pacing");
 const maxPerHour = $<HTMLInputElement>("maxPerHour");
 const maxPerDay = $<HTMLInputElement>("maxPerDay");
+const scrollMaxFound = $<HTMLInputElement>("scrollMaxFound");
 const status = $<HTMLElement>("status");
 const exportBtn = $<HTMLButtonElement>("export");
 const importBtn = $<HTMLButtonElement>("import");
@@ -36,6 +38,7 @@ async function load(): Promise<void> {
   langEl.value = cfg.lang;
   persianNormalize.checked = cfg.persianNormalize;
   matchHandle.checked = cfg.matchHandle;
+  autoScroll.checked = cfg.autoScroll;
   wordsEl.value = cfg.words.join("\n");
   tweetWordsEl.value = cfg.tweetWords.join("\n");
   autoCollect.checked = cfg.autoCollect;
@@ -43,6 +46,7 @@ async function load(): Promise<void> {
   pacing.value = String(cfg.pacingSeconds);
   maxPerHour.value = String(cfg.maxPerHour);
   maxPerDay.value = String(cfg.maxPerDay);
+  scrollMaxFound.value = String(cfg.scrollMaxFound);
 }
 
 /** Round an input to a positive integer, falling back to a default. */
@@ -66,20 +70,24 @@ async function save(): Promise<void> {
   const pacingSeconds = normalizedSeconds(pacing, DEFAULT_CONFIG.pacingSeconds);
   const perHour = normalizedCap(maxPerHour, DEFAULT_CONFIG.maxPerHour);
   const perDay = normalizedCap(maxPerDay, DEFAULT_CONFIG.maxPerDay);
+  const maxFound = normalizedCap(scrollMaxFound, DEFAULT_CONFIG.scrollMaxFound);
   scan.value = String(scanSeconds);
   pacing.value = String(pacingSeconds);
   maxPerHour.value = String(perHour);
   maxPerDay.value = String(perDay);
+  scrollMaxFound.value = String(maxFound);
   await setConfig({
     words: parseWords(wordsEl.value),
     tweetWords: parseWords(tweetWordsEl.value),
     autoCollect: autoCollect.checked,
     persianNormalize: persianNormalize.checked,
     matchHandle: matchHandle.checked,
+    autoScroll: autoScroll.checked,
     scanSeconds,
     pacingSeconds,
     maxPerHour: perHour,
     maxPerDay: perDay,
+    scrollMaxFound: maxFound,
   });
   note(t("options.saved"));
 }
@@ -95,6 +103,7 @@ async function changeLang(): Promise<void> {
 langEl.addEventListener("change", () => void changeLang());
 persianNormalize.addEventListener("change", () => void save());
 matchHandle.addEventListener("change", () => void save());
+autoScroll.addEventListener("change", () => void save());
 wordsEl.addEventListener("input", () => void save());
 tweetWordsEl.addEventListener("input", () => void save());
 autoCollect.addEventListener("change", () => void save());
@@ -102,6 +111,7 @@ scan.addEventListener("change", () => void save());
 pacing.addEventListener("change", () => void save());
 maxPerHour.addEventListener("change", () => void save());
 maxPerDay.addEventListener("change", () => void save());
+scrollMaxFound.addEventListener("change", () => void save());
 
 resetAdvancedBtn.addEventListener("click", async () => {
   scan.value = String(DEFAULT_CONFIG.scanSeconds);
@@ -155,6 +165,9 @@ importBtn.addEventListener("click", () => {
     if (typeof data.matchHandle === "boolean") {
       patch.matchHandle = data.matchHandle;
     }
+    if (typeof data.autoScroll === "boolean") {
+      patch.autoScroll = data.autoScroll;
+    }
     if (data.lang === "en" || data.lang === "fa") {
       patch.lang = data.lang;
     }
@@ -169,6 +182,9 @@ importBtn.addEventListener("click", () => {
     }
     if (Number.isFinite(data.maxPerDay)) {
       patch.maxPerDay = Math.max(0, Math.round(data.maxPerDay as number));
+    }
+    if (Number.isFinite(data.scrollMaxFound)) {
+      patch.scrollMaxFound = Math.max(0, Math.round(data.scrollMaxFound as number));
     }
 
     if (!Object.keys(patch).length) {

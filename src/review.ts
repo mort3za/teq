@@ -177,16 +177,20 @@ const STYLE = `
   }
 `;
 
+/** @font-face is ignored inside a shadow root, so the bundled Vazirmatn is
+ * declared on the page itself (fonts.css is a web-accessible resource). Shared
+ * by every in-page overlay; safe to call repeatedly. */
+export function ensureFonts(): void {
+  if (document.getElementById("teq-fonts")) return;
+  const fonts = document.createElement("link");
+  fonts.id = "teq-fonts";
+  fonts.rel = "stylesheet";
+  fonts.href = chrome.runtime.getURL("fonts.css");
+  document.head.append(fonts);
+}
+
 function mount(): void {
-  // @font-face is ignored inside a shadow root, so the bundled Vazirmatn is
-  // declared on the page itself (fonts.css is a web-accessible resource).
-  if (!document.getElementById("teq-fonts")) {
-    const fonts = document.createElement("link");
-    fonts.id = "teq-fonts";
-    fonts.rel = "stylesheet";
-    fonts.href = chrome.runtime.getURL("fonts.css");
-    document.head.append(fonts);
-  }
+  ensureFonts();
 
   host = document.createElement("div");
   root = host.attachShadow({ mode: "open" });

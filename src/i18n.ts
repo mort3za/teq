@@ -40,6 +40,9 @@ const en: Dict = {
   "popup.nothingCollected": "Nothing collected yet.",
   "popup.nothingToReview": "Nothing new to review.",
   "popup.reviewAndBlock": "Review and block",
+  "popup.autoScroll": "Auto-scroll",
+  "popup.stopScroll": "Stop scrolling",
+  "popup.autoScrollTitle": "Scroll this X page and collect matches",
   "popup.blocked": "blocked",
   "popup.total": "in total",
   "popup.inProgress": "{n} in progress",
@@ -80,6 +83,7 @@ const en: Dict = {
   "options.matchHandleHint":
     "Matches your words against the @username too, not just the display name. Off by default — only the display name is matched.",
   "options.advanced": "Advanced",
+  "options.advancedHint": "Pacing, rate limits, and auto-scroll",
   "options.warning":
     "⚠️ These pacing and rate limits are tuned to keep blocking under X's automation radar. Raising them — or blocking faster than the recommended ranges — makes your activity look automated, which can get your X account rate-limited, temporarily locked, or permanently suspended. Only change these if you understand the risk.",
   "options.limitsTitle": "Why these limits aren't exact",
@@ -99,6 +103,13 @@ const en: Dict = {
   "options.maxPerDayLabel": "Max blocks per day",
   "options.maxPerDayHint":
     "The run pauses once this many blocks happen within any rolling 24-hour window. Safe range is ~200–300; approaching it can trigger a 24h cooling-off on X. 0 disables the limit.",
+  "options.autoScroll": "Enable Auto-scroll",
+  "options.scrollMaxFoundLabel": "Stop auto-scroll after this many found",
+  "options.scrollMaxFoundHint": "One auto-scroll run stops once it has collected this many new matches. 0 disables the limit.",
+  "options.autoScrollHint":
+    "Shows the Auto-scroll button in the popup. It scrolls the X page for you and collects matches as it goes.",
+  "options.autoScrollWarning":
+    "⚠️ X's rules limit automated use of the site, and X may count auto-scroll as automated use. This can get your X account limited, locked, or suspended. Off by default — turn it on only if you accept this risk.",
   "options.reset": "Reset to defaults",
   "options.resetHint": "Restore the recommended scan, pacing, and rate-limit values above.",
   "options.saved": "Saved.",
@@ -182,6 +193,15 @@ const en: Dict = {
   "run.capReached": "{limit} reached — auto-resuming in {time}.",
   "run.rateLimited": "X says too many requests (429) — auto-resuming in {time}.",
 
+  // auto-scroll pill (on x.com)
+  "scroll.running": "Scrolling… {n} found",
+  "scroll.limited": "X rate limit — resuming in {time} · {n} found",
+  "scroll.end": "Reached the end — {n} found",
+  "scroll.max": "Reached the limit — {n} found",
+  "scroll.stopped": "Stopped — {n} found",
+  "scroll.stop": "Stop",
+  "scroll.stopHint": "Or scroll, click or press any key",
+  "scroll.review": "Review",
 };
 
 const fa: Dict = {
@@ -212,6 +232,9 @@ const fa: Dict = {
   "popup.nothingCollected": "هنوز چیزی جمع‌آوری نشده.",
   "popup.nothingToReview": "مورد تازه‌ای برای بررسی نیست.",
   "popup.reviewAndBlock": "بررسی و بلاک",
+  "popup.autoScroll": "اسکرول خودکار",
+  "popup.stopScroll": "توقف اسکرول",
+  "popup.autoScrollTitle": "اسکرول خودکار این صفحهٔ X و جمع‌آوری موارد منطبق",
   "popup.blocked": "بلاک‌شده",
   "popup.total": "در مجموع",
   "popup.inProgress": "در حال بلاک: {n}",
@@ -270,6 +293,13 @@ const fa: Dict = {
   "options.maxPerDayLabel": "حداکثر بلاک در روز",
   "options.maxPerDayHint":
     "اجرا پس از این تعداد بلاک در هر بازهٔ متحرک ۲۴ ساعته متوقف می‌شود. بازهٔ ایمن حدود ۲۰۰ تا ۳۰۰ است؛ نزدیک شدن به آن می‌تواند یک دورهٔ خنک‌سازی ۲۴ ساعته در X ایجاد کند. ۰ محدودیت را غیرفعال می‌کند.",
+  "options.autoScroll": "فعال‌سازی اسکرول خودکار",
+  "options.scrollMaxFoundLabel": "توقف اسکرول خودکار پس از این تعداد مورد",
+  "options.scrollMaxFoundHint": "هر اجرای اسکرول خودکار وقتی این تعداد مورد تازه جمع کند، متوقف می‌شود. مقدار ۰ این محدودیت را خاموش می‌کند.",
+  "options.autoScrollHint":
+    "دکمهٔ «اسکرول خودکار» را در پاپ‌آپ نشان می‌دهد. این دکمه صفحهٔ X را برایتان پایین می‌برد و هم‌زمان موارد منطبق را جمع‌آوری می‌کند.",
+  "options.autoScrollWarning":
+    "⚠️ قوانین X استفادهٔ خودکار از سایت را محدود می‌کند و ممکن است X اسکرول خودکار را استفادهٔ خودکار به حساب آورد. این کار می‌تواند حساب X شما را محدود، قفل یا معلق کند. به‌طور پیش‌فرض خاموش است — فقط در صورتی روشنش کنید که این خطر را می‌پذیرید.",
   "options.reset": "بازنشانی به پیش‌فرض",
   "options.resetHint": "مقادیر توصیه‌شدهٔ اسکن، فاصله و محدودیت نرخ بالا را بازگردانید.",
   "options.saved": "ذخیره شد.",
@@ -346,6 +376,14 @@ const fa: Dict = {
   "run.capReached": "{limit} رسید — ازسرگیری خودکار در {time}.",
   "run.rateLimited": "ایکس می‌گوید درخواست‌ها زیاد است (۴۲۹) — ازسرگیری خودکار در {time}.",
 
+  "scroll.running": "در حال اسکرول… پیدا شده: {n}",
+  "scroll.limited": "محدودیت درخواست ایکس — ادامه در {time} · پیدا شده: {n}",
+  "scroll.end": "به انتهای فهرست رسید — پیدا شده: {n}",
+  "scroll.max": "به سقف تعیین‌شده رسید — پیدا شده: {n}",
+  "scroll.stopped": "متوقف شد — پیدا شده: {n}",
+  "scroll.stop": "توقف",
+  "scroll.stopHint": "یا اسکرول کنید، کلیک کنید یا یک کلید بزنید",
+  "scroll.review": "بررسی",
 };
 
 const DICTS: Record<Lang, Dict> = { en, fa };

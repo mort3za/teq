@@ -78,6 +78,17 @@ export function fmtDuration(ms: number): string {
   const h = Math.floor(m / 60);
   return `${h}h ${m % 60}m`;
 }
+/** Shortest and longest pause between auto-scroll steps. Random in between,
+ * which spreads out the page loads instead of firing them on a fixed clock. */
+export const SCROLL_MIN_MS = 1500;
+export const SCROLL_MAX_MS = 3000;
+
+/** Milliseconds to wait after an auto-scroll step before the next one. `rand`
+ * is the [0,1) source (Math.random() in production; injected in tests). */
+export function scrollDelayMs(rand: number = Math.random()): number {
+  return SCROLL_MIN_MS + rand * (SCROLL_MAX_MS - SCROLL_MIN_MS);
+}
+
 /** Shortest hold on all automatic requests (auto-scroll, block run) after X
  * answers 429 "too many requests". */
 export const RATE_LIMIT_MS = 5 * 60 * 1000;

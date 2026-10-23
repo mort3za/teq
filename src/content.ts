@@ -6,6 +6,7 @@ import { matchReason } from "./matcher.ts";
 import { extractUser, richText, tweetTextEl } from "./extract.ts";
 import { blockUser, BlockError } from "./blocker.ts";
 import { openReview, type BlockProgress } from "./review.ts";
+import { isAutoScrolling, noteFound, startAutoScroll, stopAutoScroll } from "./autoscroll.ts";
 import { startMarks } from "./marks.ts";
 import { blockDelayMs, capReached, capRetryMs, fmtDuration, rateLimitUntil } from "./pacing.ts";
 import { setLang, t } from "./i18n.ts";
@@ -86,11 +87,21 @@ function tweetLang(textEl: Element | null): string | undefined {
   return lang && lang !== "und" ? lang : undefined;
 }
 
+// The scan in flight, if any. The auto-collect tick and the auto-scroll loop
+// both scan; sharing one scan keeps them from adding (and counting) the same
+// fresh match twice.
+let scanning: Promise<number> | null = null;
+
 /**
  * Scan the currently-rendered page for matches and add new ones to the
  * collected list. Returns how many fresh matches were added.
  */
-async function collect(): Promise<number> {
+function collect(): Promise<number> {
+  scanning ??= scan().finally(() => (scanning = null));
+  return scanning;
+}
+
+async function scan(): Promise<number> {
   const cfg = await getConfig();
   // Skip anyone already collected, already blocked (logged), or ignored —
   // re-collecting any of them would put them back in the review queue.
@@ -135,6 +146,7 @@ async function collect(): Promise<number> {
   }
 
   if (found.length) await addCollected(found);
+  noteFound(found.length);
   return found.length;
 }
 
@@ -412,15 +424,31 @@ function start(): void {
   void tick();
 
   // Messages from the popup: "collect" scans the page, "review" opens the
-  // in-page review overlay (which queues blocks itself).
+  // in-page review overlay (which queues blocks itself), "autoScroll" /
+  // "stopAutoScroll" start and stop scrolling the page to collect more.
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg?.type === "collect") {
       void collect().then((collected) => sendResponse({ collected }));
       return true; // keep the channel open for the async response
     }
     if (msg?.type === "review") {
+      stopAutoScroll();
       void openReview(enqueueBlocks);
       sendResponse({ ok: true });
+      return undefined;
+    }
+    if (msg?.type === "autoScroll") {
+      void startAutoScroll(collect, () => void openReview(enqueueBlocks));
+      sendResponse({ ok: true });
+      return undefined;
+    }
+    if (msg?.type === "stopAutoScroll") {
+      stopAutoScroll();
+      sendResponse({ ok: true });
+      return undefined;
+    }
+    if (msg?.type === "autoScrollState") {
+      sendResponse({ running: isAutoScrolling() });
       return undefined;
     }
     if (msg?.type === "pauseBlocking") {

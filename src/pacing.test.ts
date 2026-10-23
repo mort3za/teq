@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { blockDelayMs, PACING_JITTER, capReached, capRetryMs, fmtDuration, rateLimitUntil, RATE_LIMIT_MS } from "./pacing.ts";
+import { blockDelayMs, PACING_JITTER, capReached, capRetryMs, fmtDuration, scrollDelayMs, SCROLL_MIN_MS, SCROLL_MAX_MS, rateLimitUntil, RATE_LIMIT_MS } from "./pacing.ts";
 test("with zero jitter the delay is exactly the configured pacing", () => {
   expect(blockDelayMs(30, 0)).toBe(30_000);
   expect(blockDelayMs(5, 0)).toBe(5_000);
@@ -104,6 +104,12 @@ test("fmtDuration formats seconds, minutes, and hours", () => {
   expect(fmtDuration(2 * HOUR + 5 * MIN)).toBe("2h 5m");
   expect(fmtDuration(-1000)).toBe("0s");
 });
+test("the auto-scroll delay stays between the min and max", () => {
+  expect(scrollDelayMs(0)).toBe(SCROLL_MIN_MS);
+  expect(scrollDelayMs(0.5)).toBe((SCROLL_MIN_MS + SCROLL_MAX_MS) / 2);
+  expect(scrollDelayMs(0.999)).toBeLessThan(SCROLL_MAX_MS);
+});
+
 test("a 429 holds requests for RATE_LIMIT_MS when X sends no reset time", () => {
   expect(rateLimitUntil(undefined, 1_000)).toBe(1_000 + RATE_LIMIT_MS);
   expect(rateLimitUntil("garbage", 1_000)).toBe(1_000 + RATE_LIMIT_MS);

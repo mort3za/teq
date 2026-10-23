@@ -110,7 +110,15 @@
         </div>
 
         <details class="advanced">
-          <summary data-i18n="options.advanced">Advanced</summary>
+          <summary>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/></svg>
+            <span class="advanced-text">
+              <span class="advanced-title" data-i18n="options.advanced">Advanced</span>
+              <span class="advanced-hint" data-i18n="options.advancedHint">Pacing, rate limits, and auto-scroll</span>
+            </span>
+            <svg class="icon advanced-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </summary>
+          <div class="advanced-body">
 
           <p class="warning" data-i18n="options.warning">
             ⚠️ These pacing and rate limits are tuned to keep blocking under X's automation radar. Raising them — or
@@ -172,6 +180,31 @@
           <div class="field">
             <button id="resetAdvanced" type="button" class="action"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg><span data-i18n="options.reset">Reset to defaults</span></button>
             <p class="hint" data-i18n="options.resetHint">Restore the recommended scan, pacing, and rate-limit values above.</p>
+          </div>
+          <div class="field">
+            <label class="switch-field">
+              <span class="switch">
+                <input id="autoScroll" type="checkbox" />
+                <span class="slider"></span>
+              </span>
+              <span data-i18n="options.autoScroll">Enable Auto-scroll</span>
+            </label>
+            <p class="hint" data-i18n="options.autoScrollHint">
+              Shows the Auto-scroll button in the popup. It scrolls the X page for you and collects matches as it goes.
+            </p>
+            <p class="warning" data-i18n="options.autoScrollWarning">
+              ⚠️ X's rules limit automated use of the site, and X may count auto-scroll as automated use. This can get
+              your X account limited, locked, or suspended. Off by default — turn it on only if you accept this risk.
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="scrollMaxFound" data-i18n="options.scrollMaxFoundLabel">Stop auto-scroll after this many found</label>
+            <input id="scrollMaxFound" type="number" min="0" step="1" />
+            <p class="hint" data-i18n="options.scrollMaxFoundHint">
+              One auto-scroll run stops once it has collected this many new matches. 0 disables the limit.
+            </p>
+          </div>
           </div>
         </details>
         <p id="status" class="saved"></p>

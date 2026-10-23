@@ -32,13 +32,19 @@ src/content.ts   Content script on x.com. Auto-scans the DOM on an interval,
                  collects matches (via extract.ts), and drains a paced block
                  queue (SECONDS_PER_BLOCK + jitter; stops/cools down on
                  401/403/429). Message-driven from the popup: "collect" scans,
-                 "review" opens the overlay.
+                 "review" opens the overlay;
+                 "autoScroll"/"stopAutoScroll" drive autoscroll.ts.
 src/extract.ts   Pure DOM extraction for a "User-Name" cell (no chrome) —
                  unit-testable. extractUser() pulls { handle, name }; richText()
                  restores Twemoji <img> emoji. Keys only off stable, semantic
                  signals, never X's build-hashed CSS classes.
 src/matcher.ts   Pure match logic (no DOM/chrome) — unit-testable. matchReason()
                  = case-insensitive substring; parseWords() parses the textarea.
+src/autoscroll.ts Auto-scroll run + its floating status pill (Shadow DOM) on
+                 x.com. Scrolls a jittered step (pacing.scrollDelayMs), scans
+                 after each, stops on user input, Stop, or end of list. Opt-in:
+                 the popup button shows only when Config.autoScroll is on
+                 (Options → Advanced, with a warning).
 src/blocker.ts   Wraps X blocks/create.json (same-origin authed fetch; ct0 CSRF).
 src/pacing.ts    Pure timing logic (no DOM/chrome) — unit-testable. blockDelayMs()
                  = paced delay between blocks + up to PACING_JITTER random jitter;

@@ -17,7 +17,7 @@ import {
 import { parseWords } from "./matcher.ts";
 import { fmtDuration } from "./pacing.ts";
 import { applyI18n, setLang, t } from "./i18n.ts";
-import { PAUSE_ICON, PLAY_ICON } from "./icons.ts";
+import { CHEVRONS_DOWN_ICON, PAUSE_ICON, PLAY_ICON, STOP_ICON } from "./icons.ts";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -33,6 +33,7 @@ const collectedCount = $<HTMLElement>("collectedCount");
 const collectedEmpty = $<HTMLParagraphElement>("collectedEmpty");
 const clearCollectedBtn = $<HTMLButtonElement>("clearCollected");
 const reviewBtn = $<HTMLButtonElement>("review");
+const scrollBtn = $<HTMLButtonElement>("autoScroll");
 const progress = $<HTMLDivElement>("progress");
 const progressText = $<HTMLElement>("progressText");
 const pauseToggle = $<HTMLButtonElement>("pauseToggle");
@@ -48,6 +49,7 @@ async function load(): Promise<void> {
   words.value = cfg.words.join("\n");
   tweetWords.value = cfg.tweetWords.join("\n");
   autoCollect.checked = cfg.autoCollect;
+  scrollBtn.hidden = !cfg.autoScroll;
   tip.hidden = await getTipDismissed();
 
   const err = await getLastError();
@@ -209,7 +211,55 @@ async function review(): Promise<void> {
   }
 }
 
+// Whether the active X tab is auto-scrolling; asked from the tab when the popup
+// opens (the tab is the source of truth — nothing to go stale in storage).
+let scrolling = false;
+
+/** Label the auto-scroll button for the current state. The label keeps its
+ * data-i18n key, so a live language switch (applyI18n) relabels it too. */
+function paintScrollBtn(): void {
+  const key = scrolling ? "popup.stopScroll" : "popup.autoScroll";
+  scrollBtn.innerHTML = scrolling ? STOP_ICON : CHEVRONS_DOWN_ICON;
+  const label = document.createElement("span");
+  label.dataset.i18n = key;
+  label.textContent = t(key);
+  scrollBtn.append(label);
+}
+
+async function loadScrollState(): Promise<void> {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (tab?.id && X_URL.test(tab.url ?? "")) {
+    try {
+      const res = await chrome.tabs.sendMessage(tab.id, { type: "autoScrollState" });
+      scrolling = res?.running === true;
+    } catch {
+      scrolling = false; // no content script yet (tab not reloaded since install)
+    }
+  }
+  paintScrollBtn();
+}
+
+/** Start or stop auto-scroll on the active X tab. Starting closes the popup, so
+ * the page (and its status pill) is in view. */
+async function toggleScroll(): Promise<void> {
+  const tab = await activeXTab();
+  if (!tab) return;
+  try {
+    await chrome.tabs.sendMessage(tab.id!, { type: scrolling ? "stopAutoScroll" : "autoScroll" });
+  } catch {
+    runStatus.textContent = t("popup.reloadX");
+    return;
+  }
+  if (!scrolling) {
+    window.close();
+    return;
+  }
+  scrolling = false;
+  paintScrollBtn();
+}
+
 reviewBtn.addEventListener("click", () => void review());
+scrollBtn.addEventListener("click", () => void toggleScroll());
 dismissTipBtn.addEventListener("click", () => {
   tip.hidden = true;
   void dismissTip();
@@ -225,4 +275,4 @@ chrome.storage.onChanged.addListener((_changes, area) => {
   if (area === "local") void load();
 });
 
-void load();
+void load().then(loadScrollState);

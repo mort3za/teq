@@ -4,7 +4,7 @@
 
 A Chrome extension that finds X.com (Twitter) accounts by their **display name** (or, optionally, their **@handle**) and blocks them for you — safely, in the background, while you browse.
 
-You write a few rules (words or emoji). As you scroll X, teq quietly collects everyone whose display name matches — and, if you turn on **Match @username**, their handle too. When you're ready, you review the list and block them in one click. teq then blocks them one at a time, slowly enough that X never sees a bot.
+You write a few rules (words or emoji). As you scroll X, Teq quietly collects everyone whose display name matches — and, if you turn on **Match @username**, their handle too. When you're ready, you review the list and block them in one click. Teq then blocks them one at a time, slowly, to stay within X's rate limits.
 
 > **Heads up:** Blocking is hard to undo at scale. Teq always lets you review and edit the list before anything happens — nothing is blocked automatically.
 
@@ -31,9 +31,11 @@ The Teq icon appears in your toolbar. You're ready.
 
 **1b. Or match what they post.** Add whole phrases — one per line — to **Phrases to match inside tweets**. The author of any tweet whose text contains one of them is collected too, and the tweet itself is kept as a reference.
 
-**2. Browse X.** Leave auto-collect on (the default) and just scroll. teq scans the page every few seconds and adds matching accounts to your **collected list**. No clicking required.
+**2. Browse X.** Leave auto-collect on (the default) and just scroll. Teq scans the page every few seconds and adds matching accounts to your **collected list**. No clicking required.
 
-**3. Review and block.** Open **Review** from the popup for a full-page list of everyone collected. Filter by language, deselect anyone you want to keep, then hit **Block selected**. teq blocks them one by one in the background — keep the X tab open and watch the progress.
+**2b. Or let Teq scroll for you.** This is off by default — turn on **Enable Auto-scroll** in Options → Advanced first, and read its warning. Then open an X page with a long list (a timeline, search results, replies, followers) and click **Auto-scroll** in the popup. Teq scrolls the page at a slow, steady pace and collects matches as it goes. A small pill at the bottom shows how many it found. It stops when you click **Stop**, when you scroll, click or press a key yourself, or when the list ends.
+
+**3. Review and block.** Open **Review** from the popup for a full-page list of everyone collected. Filter by language, deselect anyone you want to keep, then hit **Block selected**. Teq blocks them one by one in the background — keep the X tab open and watch the progress.
 
 That's the whole loop: **rules → collect → review → block.**
 
@@ -69,6 +71,7 @@ Edit your rules and the auto-collect toggle right in the popup. The full set liv
 | **Language**      | Interface language — English or Persian (فارسی), switchable live | auto¹   |
 | **Persian/Arabic matching** | Fold Arabic ي/ك ↔ Persian ی/ک and Arabic-Indic ↔ Persian digits when matching | off |
 | **Match @username** | Also match your words against the @handle, not just the display name | off |
+| **Enable Auto-scroll** | Show the Auto-scroll button in the popup (Advanced; read the warning first) | off |
 
 ¹ Defaults to Persian if your browser's UI language is Persian, otherwise English.
 
