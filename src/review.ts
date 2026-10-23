@@ -6,6 +6,8 @@
 import { getCollected, getConfig, removeCollected, addIgnored, type CollectedUser, type BlockProgress } from "./storage.ts";
 import { langName, langOptions } from "./lang.ts";
 import { getLang, isRtl, setLang, t, type Lang } from "./i18n.ts";
+import { BAN_ICON, INFO_ICON, SQUARE_CHECK_ICON, SQUARE_MINUS_ICON, X_ICON } from "./icons.ts";
+import theme from "./theme.css" with { type: "text" };
 
 export type { BlockProgress };
 
@@ -20,6 +22,7 @@ let countEl: HTMLElement | null = null;
 let statusEl: HTMLElement | null = null;
 let langSel: HTMLSelectElement | null = null;
 let searchEl: HTMLInputElement | null = null;
+let selAllBtn: HTMLButtonElement | null = null;
 
 // Lowercased handles checked for blocking.
 let selected = new Set<string>();
@@ -58,89 +61,138 @@ const STYLE = `
     background: rgba(0,0,0,.6);
     font: 14px/1.4 'Vazirmatn', -apple-system, system-ui, sans-serif;
     color: #0f1419;
+    --muted: #536471; --line: #eff3f4; --control-border: #cfd9de; --surface: #f7f9f9;
   }
   .card {
     display: flex; flex-direction: column;
     width: 92vw; max-width: 1100px; max-height: 88vh;
-    background: #fff; border-radius: 14px;
+    background: #fff; border-radius: 16px;
     box-shadow: 0 12px 40px rgba(0,0,0,.4); overflow: hidden;
   }
+  /* One spacing scale (4/8/12/16) and one control height (36px) throughout. */
   .head, .foot {
-    display: flex; align-items: center; gap: 12px;
-    padding: 14px 18px; flex: none;
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px; flex: none;
   }
-  .head { border-bottom: 1px solid #eee; }
-  .foot { border-top: 1px solid #eee; }
-  .head h2 { margin: 0; font-size: 16px; font-weight: 700; }
+  .head { flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+  .foot { border-top: 1px solid var(--line); }
+  .title { display: flex; align-items: baseline; gap: 8px; margin-inline-end: auto; }
+  .title h2 { margin: 0; font-size: 16px; font-weight: 700; }
+  /* Same optical trim as the button labels in theme.css. */
+  .title > * { text-box: trim-both cap alphabetic; }
+  .backdrop:lang(fa) .title > * { text-box: trim-both ex alphabetic; }
+  .count { color: var(--muted); font-size: 13px; }
   .spacer { flex: 1; }
   .grid {
-    flex: 1; overflow-y: auto; padding: 14px 18px;
+    flex: 1; overflow-y: auto; padding: 16px;
     display: grid; gap: 8px;
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     align-content: start;
+    align-items: start; /* an opened tweet grows only its own cell */
   }
   .cell {
-    display: flex; flex-direction: column; gap: 6px;
-    padding: 6px 8px; border-radius: 8px; background: #f7f9f9;
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 8px; padding-inline-start: 12px; border-radius: 12px; background: var(--surface);
+    border: 1px solid transparent;
     min-width: 0;
   }
-  .row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  /* Selected = will be blocked: tint it in the Block button's red. */
+  .cell:has(input:checked) {
+    background: color-mix(in srgb, var(--persian-red) 6%, transparent);
+    border-color: color-mix(in srgb, var(--persian-red) 35%, transparent);
+  }
+  .row { display: flex; align-items: center; gap: 4px; min-width: 0; }
   .tweet {
-    margin: 0; font-size: 12px; line-height: 1.5; color: #536471;
+    margin: 0; font-size: 12px; line-height: 1.5; color: var(--muted);
     white-space: pre-wrap; overflow-wrap: anywhere;
     max-height: 9em; overflow-y: auto;
-    border-top: 1px solid rgba(0,0,0,.08); padding-top: 6px;
+    border-top: 1px solid var(--line); padding-top: 8px;
   }
   .tweet[hidden] { display: none; }
   .cell label {
-    display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: center; gap: 12px;
     flex: 1; min-width: 0; cursor: pointer;
   }
-  .cell input { flex: none; width: 15px; height: 15px; cursor: pointer; }
+  .cell input {
+    flex: none; width: 16px; height: 16px; margin: 0; cursor: pointer;
+    accent-color: var(--persian-red);
+  }
   .who { display: flex; flex-direction: column; min-width: 0; }
   .who .name {
     font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .who .handle { color: #536471; font-size: 12px; }
+  .who .handle { color: var(--muted); font-size: 12px; }
+  /* Names set their own direction (dir=auto); keep them aligned with the overlay. */
+  .backdrop[dir="ltr"] .who { text-align: left; }
+  .backdrop[dir="rtl"] .who { text-align: right; }
   .icon-btn {
-    flex: none; border: 0; background: transparent; cursor: pointer;
-    color: #536471; font-size: 14px; padding: 2px 4px; border-radius: 4px;
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; padding: 0;
+    border: 0; background: transparent; cursor: pointer;
+    color: var(--muted); border-radius: 8px;
   }
-  .icon-btn:hover { background: rgba(244,33,46,.12); color: #f4212e; }
-  .info-btn:hover { background: rgba(29,155,240,.14); color: #1d9bf0; }
-  .empty { padding: 40px; text-align: center; color: #536471; }
+  .icon-btn:hover { background: var(--icon-btn-hover-bg); color: inherit; }
+  .info-btn[aria-expanded="true"] { color: inherit; background: var(--icon-btn-hover-bg); }
+  .empty { padding: 40px 16px; text-align: center; color: var(--muted); }
+  .btn, .lang-sel, .search {
+    box-sizing: border-box; height: 36px; margin: 0;
+    font: inherit; border-radius: 9999px;
+  }
   .btn {
-    border: 0; border-radius: 9999px; padding: 8px 18px;
-    font-weight: 700; font-size: 14px; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    border: 0; padding: 0 16px; font-weight: 700; cursor: pointer; white-space: nowrap;
   }
-  .btn-primary { background: #f4212e; color: #fff; }
-  .btn-primary:disabled { opacity: .5; cursor: default; }
-  .btn-ghost { background: transparent; color: inherit; text-decoration: underline; }
-  .status { color: #536471; font-size: 13px; }
+  .btn-primary { background: var(--persian-red); color: #fff; }
+  .btn-primary:not(:disabled):hover { background: color-mix(in srgb, var(--persian-red) 88%, #000); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn-ghost { background: transparent; color: inherit; padding: 0 12px; }
+  .btn-ghost:not(:disabled):hover { background: var(--icon-btn-hover-bg); }
+  button:focus-visible, .lang-sel:focus-visible, .search:focus-visible, .cell input:focus-visible {
+    outline: 2px solid #1d9bf0; outline-offset: 2px;
+  }
+  .status { color: var(--muted); font-size: 13px; }
   .lang-sel, .search {
-    font: inherit; padding: 6px 10px; border-radius: 8px;
-    border: 1px solid #ccd6dd; background: #fff; color: inherit;
+    padding: 0 16px; border: 1px solid var(--control-border); background-color: transparent; color: inherit;
   }
-  .lang-sel { cursor: pointer; }
-  .search { width: 180px; }
+  .lang-sel { cursor: pointer; padding-inline-end: 36px; } /* room for the chevron (theme.css) */
+  .lang-sel option { background: #fff; color: #0f1419; }
+  .search { width: 240px; max-width: 100%; }
+  /* Inputs can't use text-box trimming; shift their text to the optical center. */
+  .search { padding-top: 3px; }
+  .backdrop:lang(fa) .search { padding-top: 1px; }
+  /* A select moves its text by only half its top padding, so it needs about twice the shift. */
+  .lang-sel { padding-top: 5px; }
+  .backdrop:lang(fa) .lang-sel { padding-top: 6px; }
+  .search::placeholder { color: var(--muted); }
+  @media (max-width: 600px) {
+    .title { flex: 1 1 100%; }
+    .search { flex: 1 1 100%; width: auto; }
+    .lang-sel { flex: 1; min-width: 0; }
+  }
   @media (prefers-color-scheme: dark) {
-    .card { background: #15202b; color: #e7e9ea; }
-    .head, .foot { border-color: #38444d; }
-    .cell { background: #1e2a36; }
-    .cell:hover { background: #243340; }
-    .icon-btn { color: #8b98a5; }
-    .tweet { color: #8b98a5; border-color: rgba(255,255,255,.12); }
-    .lang-sel, .search { background: #1e2a36; border-color: #38444d; }
-    .status { color: #8b98a5; }
+    .backdrop { color: #e7e9ea; --muted: #8b98a5; --line: #2f3336; --control-border: #3e4144; --surface: #16181c; }
+    .card { background: #000; box-shadow: 0 0 0 1px #2f3336, 0 12px 40px rgba(0,0,0,.6); }
+    .cell:has(input:checked) { background: color-mix(in srgb, var(--persian-red) 12%, transparent); }
+    .lang-sel option { background: #16181c; color: #e7e9ea; }
   }
 `;
 
 function mount(): void {
+  // @font-face is ignored inside a shadow root, so the bundled Vazirmatn is
+  // declared on the page itself (fonts.css is a web-accessible resource).
+  if (!document.getElementById("teq-fonts")) {
+    const fonts = document.createElement("link");
+    fonts.id = "teq-fonts";
+    fonts.rel = "stylesheet";
+    fonts.href = chrome.runtime.getURL("fonts.css");
+    document.head.append(fonts);
+  }
+
   host = document.createElement("div");
   root = host.attachShadow({ mode: "open" });
 
   const style = document.createElement("style");
-  style.textContent = STYLE;
+  style.textContent = theme + STYLE;
 
   backdrop = document.createElement("div");
   backdrop.className = "backdrop";
@@ -153,12 +205,13 @@ function mount(): void {
 
   const head = document.createElement("div");
   head.className = "head";
-  const title = document.createElement("h2");
-  title.textContent = t("review.title");
+  const title = document.createElement("div");
+  title.className = "title";
+  const h2 = document.createElement("h2");
+  h2.textContent = t("review.title");
   countEl = document.createElement("span");
-  countEl.className = "handle";
-  const spacer = document.createElement("div");
-  spacer.className = "spacer";
+  countEl.className = "count";
+  title.append(h2, countEl);
   searchEl = document.createElement("input");
   searchEl.className = "search";
   searchEl.type = "search";
@@ -173,9 +226,8 @@ function mount(): void {
     langFilter = langSel!.value;
     render();
   });
-  const selAll = document.createElement("button");
+  const selAll = (selAllBtn = document.createElement("button"));
   selAll.className = "btn btn-ghost";
-  selAll.textContent = t("review.selectAll");
   selAll.addEventListener("click", () => {
     const rows = visible();
     const keys = rows.map((u) => u.handle.toLowerCase());
@@ -188,9 +240,9 @@ function mount(): void {
   });
   const closeBtn = document.createElement("button");
   closeBtn.className = "btn btn-ghost";
-  closeBtn.textContent = t("review.close");
+  setLabel(closeBtn, X_ICON, t("review.close"));
   closeBtn.addEventListener("click", close);
-  head.append(title, countEl, spacer, searchEl, langSel, selAll, closeBtn);
+  head.append(title, searchEl, langSel, selAll, closeBtn);
 
   grid = document.createElement("div");
   grid.className = "grid";
@@ -242,9 +294,12 @@ function cell(u: CollectedUser): HTMLDivElement {
   const name = document.createElement("span");
   name.className = "name";
   name.textContent = u.name || u.handle;
+  name.dir = "auto"; // a Latin name in the RTL overlay truncates at its own end
   const handle = document.createElement("span");
   handle.className = "handle";
-  handle.textContent = u.lang ? `@${u.handle} · ${langName(u.lang)}` : `@${u.handle}`;
+  // ⁦…⁩ isolates the handle so RTL layout can't move the "@" to its far side.
+  const at = `\u2066@${u.handle}\u2069`;
+  handle.textContent = u.lang ? `${at} · ${langName(u.lang)}` : at;
   who.append(name, handle);
   label.append(cb, who);
 
@@ -253,7 +308,8 @@ function cell(u: CollectedUser): HTMLDivElement {
   const rm = document.createElement("button");
   rm.className = "icon-btn";
   rm.title = t("review.ignore");
-  rm.textContent = "✕";
+  rm.setAttribute("aria-label", t("review.ignore"));
+  rm.innerHTML = X_ICON;
   rm.addEventListener("click", async () => {
     selected.delete(key);
     await addIgnored({ handle: u.handle, name: u.name, at: Date.now() });
@@ -279,9 +335,12 @@ function cell(u: CollectedUser): HTMLDivElement {
     const info = document.createElement("button");
     info.className = "icon-btn info-btn";
     info.title = t("review.showTweet");
-    info.textContent = "ℹ";
+    info.setAttribute("aria-label", t("review.showTweet"));
+    info.setAttribute("aria-expanded", "false");
+    info.innerHTML = INFO_ICON;
     info.addEventListener("click", () => {
       tweet.hidden = !tweet.hidden;
+      info.setAttribute("aria-expanded", String(!tweet.hidden));
     });
 
     row.append(info);
@@ -292,14 +351,33 @@ function cell(u: CollectedUser): HTMLDivElement {
   return el;
 }
 
+/** Set a button's text label, with its icon in front. */
+function setLabel(btn: HTMLButtonElement, icon: string, text: string): void {
+  btn.innerHTML = icon;
+  const label = document.createElement("span"); // a span so theme.css can trim it
+  label.textContent = text;
+  btn.append(label);
+}
+
 function updateBlockBtn(): void {
+  if (selAllBtn) {
+    // The toggle acts on the visible users only, so its label does too.
+    const keys = visible().map((u) => u.handle.toLowerCase());
+    const allSelected = keys.length > 0 && keys.every((k) => selected.has(k));
+    setLabel(
+      selAllBtn,
+      allSelected ? SQUARE_MINUS_ICON : SQUARE_CHECK_ICON,
+      t(allSelected ? "review.deselectAll" : "review.selectAll"),
+    );
+    selAllBtn.disabled = keys.length === 0;
+  }
   if (!blockBtn) return;
   if (blocking) {
-    blockBtn.textContent = t("review.blockingBtn");
+    setLabel(blockBtn, BAN_ICON, t("review.blockingBtn"));
     blockBtn.disabled = true;
     return;
   }
-  blockBtn.textContent = t("review.blockN", { n: selected.size });
+  setLabel(blockBtn, BAN_ICON, t("review.blockN", { n: selected.size }));
   blockBtn.disabled = selected.size === 0;
 }
 
@@ -387,7 +465,10 @@ export async function openReview(
     host = null;
   }
   if (!host) mount();
-  if (backdrop) backdrop.dir = isRtl() ? "rtl" : "ltr";
+  if (backdrop) {
+    backdrop.dir = isRtl() ? "rtl" : "ltr";
+    backdrop.lang = getLang(); // for :lang(fa) in theme.css, not x.com's own lang
+  }
   host!.style.display = "block";
   blocking = false;
   if (statusEl) statusEl.textContent = "";

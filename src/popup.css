@@ -3,18 +3,22 @@
   font-family: "Vazirmatn", system-ui, -apple-system, sans-serif;
 }
 
+/* Spacing scale: 4 / 8 / 12 / 16 px. Blocks are 12px apart. */
 body {
   width: 320px;
   margin: 0;
-  padding: 12px;
+  padding: 16px;
   font-size: 13px;
+  background: Canvas;
+  color: CanvasText;
 }
 
 header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 h1 {
@@ -24,25 +28,40 @@ h1 {
 
 .field {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .field > span {
   display: block;
   margin-bottom: 4px;
-  color: #666;
+  color: var(--muted);
 }
 
 textarea {
+  display: block;
   width: 100%;
   box-sizing: border-box;
+  margin: 0;
   font: inherit;
-  padding: 6px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  line-height: 1.5;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
   background: transparent;
   color: inherit;
   resize: vertical;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+button:focus-visible,
+a:focus-visible,
+.switch input:focus-visible + .slider {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .switch-field {
@@ -51,10 +70,23 @@ textarea {
   gap: 8px;
 }
 
+.head-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 header .switch-field {
   font-size: 12px;
-  color: #666;
+  color: var(--muted);
   cursor: pointer;
+  user-select: none;
+  margin-inline-end: 4px;
+}
+
+/* The label reads as the state: muted when off, full color when on. */
+header .switch-field:has(input:checked) {
+  color: inherit;
 }
 
 .switch {
@@ -74,7 +106,7 @@ header .switch-field {
 .slider {
   position: absolute;
   inset: 0;
-  background: #ccc;
+  background: #8886;
   border-radius: 22px;
   transition: background 0.15s;
   cursor: pointer;
@@ -89,11 +121,20 @@ header .switch-field {
   top: 3px;
   background: #fff;
   border-radius: 50%;
+  box-shadow: 0 1px 2px #0004;
   transition: transform 0.15s;
 }
 
+.switch-field:hover .slider {
+  background: #8888;
+}
+
+.switch-field:hover input:checked + .slider {
+  background: #1a8cd8;
+}
+
 .switch input:checked + .slider {
-  background: #1d9bf0;
+  background: var(--accent);
 }
 
 .switch input:checked + .slider::before {
@@ -128,8 +169,14 @@ header .switch-field {
 }
 
 .runStatus {
-  color: #888;
+  margin: 8px 0 0;
+  text-align: center;
+  color: #b07d00;
   font-size: 12px;
+}
+
+.runStatus:empty {
+  display: none;
 }
 
 .progress[hidden] {
@@ -140,9 +187,12 @@ header .switch-field {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
-  padding: 7px 10px;
-  border-radius: 6px;
+  min-height: var(--control-h);
+  box-sizing: border-box;
+  margin-bottom: 12px;
+  padding: 4px;
+  padding-inline-start: 12px;
+  border-radius: 8px;
   background: #00ba7c1a;
   color: #0f8a5f;
   font-weight: 600;
@@ -154,8 +204,8 @@ header .switch-field {
 
 .progress .dot {
   flex: none;
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: #00ba7c;
   animation: blink 1s ease-in-out infinite;
@@ -178,44 +228,52 @@ header .switch-field {
   animation: none;
 }
 
-.pause-toggle {
-  flex: none;
-  font: inherit;
-  line-height: 1;
-  border: none;
-  background: none;
-  color: inherit;
-  cursor: pointer;
-  padding: 2px 4px;
-  border-radius: 4px;
-}
-
-.pause-toggle:hover {
-  background: #8883;
-}
-
 .stats {
-  margin: 10px 0;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
 }
 
-.settings-link {
+/* Square button holding one SVG icon (settings, clear list, pause, close tip).
+   Every one of them hovers the same way. */
+.icon-btn {
+  flex: none;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  color: #1d9bf0;
-  text-decoration: none;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.icon-btn[hidden] {
+  display: none;
+}
+
+.icon-btn:hover {
+  background: var(--icon-btn-hover-bg);
+  color: CanvasText;
+}
+
+/* The pause button keeps the green/amber color of its row. */
+.pause-toggle,
+.pause-toggle:hover {
+  color: inherit;
 }
 
 .error {
-  background: #fdecea;
-  color: #b71c1c;
-  border-radius: 6px;
-  padding: 6px 8px;
-  margin-bottom: 10px;
+  background: color-mix(in srgb, var(--persian-red) 12%, transparent);
+  color: var(--persian-red);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
 }
 
 details {
@@ -249,15 +307,15 @@ details {
 }
 
 .collected {
-  margin: 10px 0;
+  margin-bottom: 12px;
 }
 
 .collected-head {
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: #666;
-  margin-bottom: 6px;
+  gap: 8px;
+  color: var(--muted);
+  margin-bottom: 4px;
 }
 
 .collected-count {
@@ -268,17 +326,21 @@ details {
   font: inherit;
   border: none;
   background: none;
-  color: #1d9bf0;
+  color: var(--accent);
   cursor: pointer;
   padding: 0;
   text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
 }
 
 .collected-list {
   list-style: none;
   margin: 0;
   padding: 0;
-  max-height: 180px;
+  max-height: 150px;
   overflow-y: auto;
 }
 
@@ -286,8 +348,8 @@ details {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 2px;
-  border-bottom: 1px solid #8882;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
 }
 
 .pick-label {
@@ -311,8 +373,17 @@ details {
   white-space: nowrap;
 }
 
+/* Names set their own direction (dir=auto); keep them aligned with the page. */
+[dir="ltr"] .who {
+  text-align: left;
+}
+
+[dir="rtl"] .who {
+  text-align: right;
+}
+
 .who .handle {
-  color: #888;
+  color: var(--muted);
   font-size: 12px;
 }
 
@@ -327,20 +398,29 @@ details {
 }
 
 .remove:hover {
-  color: #e0245e;
+  color: var(--persian-red);
 }
 
 .block-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   font: inherit;
   font-weight: 600;
   width: 100%;
-  margin-top: 8px;
-  padding: 7px 12px;
-  border: 1px solid #e0245e;
-  border-radius: 6px;
-  background: #e0245e;
+  height: var(--control-h);
+  margin-top: 12px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--persian-red);
   color: #fff;
   cursor: pointer;
+}
+
+.block-btn:not(:disabled):hover {
+  background: color-mix(in srgb, var(--persian-red) 88%, #000);
 }
 
 .block-btn:disabled {
@@ -348,9 +428,24 @@ details {
   cursor: default;
 }
 
+.tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.tip[hidden] {
+  display: none;
+}
+
+/* Pull the button up so its icon centers on the first line of the note. */
+.tip .icon-btn {
+  margin-top: -6px;
+}
+
 .note {
-  color: #888;
+  color: var(--muted);
   font-size: 11px;
-  line-height: 1.4;
-  margin-top: 0;
+  line-height: 1.5;
+  margin: 0;
 }

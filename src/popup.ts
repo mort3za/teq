@@ -9,12 +9,15 @@ import {
   getCollected,
   clearCollected,
   getBlockProgress,
+  getTipDismissed,
+  dismissTip,
   type CollectedUser,
   type BlockProgress,
 } from "./storage.ts";
 import { parseWords } from "./matcher.ts";
 import { fmtDuration } from "./pacing.ts";
 import { applyI18n, setLang, t } from "./i18n.ts";
+import { PAUSE_ICON, PLAY_ICON } from "./icons.ts";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -32,6 +35,8 @@ const reviewBtn = $<HTMLButtonElement>("review");
 const progress = $<HTMLDivElement>("progress");
 const progressText = $<HTMLElement>("progressText");
 const pauseToggle = $<HTMLButtonElement>("pauseToggle");
+const tip = $<HTMLDivElement>("tip");
+const dismissTipBtn = $<HTMLButtonElement>("dismissTip");
 
 const X_URL = /^https?:\/\/(x|twitter)\.com\//;
 
@@ -42,6 +47,7 @@ async function load(): Promise<void> {
   words.value = cfg.words.join("\n");
   tweetWords.value = cfg.tweetWords.join("\n");
   autoCollect.checked = cfg.autoCollect;
+  tip.hidden = await getTipDismissed();
 
   const err = await getLastError();
   errorBox.hidden = !err;
@@ -91,7 +97,7 @@ function applyProgress(p: BlockProgress | null): void {
   // Both non-blocking states get the muted/idle styling; only a manual pause
   // shows the ▶ resume affordance — a waiting run resumes itself.
   progress.classList.toggle("paused", isPaused || isWaiting);
-  pauseToggle.textContent = isPaused ? "▶" : "⏸";
+  pauseToggle.innerHTML = isPaused ? PLAY_ICON : PAUSE_ICON;
   pauseToggle.setAttribute("aria-label", isPaused ? t("popup.aria.resume") : t("popup.aria.pause"));
 }
 
@@ -136,9 +142,11 @@ function who(u: CollectedUser): HTMLSpanElement {
   span.className = "who";
   const name = document.createElement("strong");
   name.textContent = u.name || u.handle;
+  name.dir = "auto"; // a Latin name in the RTL popup truncates at its own end
   const handle = document.createElement("span");
   handle.className = "handle";
-  handle.textContent = `@${u.handle}`;
+  // ⁦…⁩ isolates the handle so RTL layout can't move the "@" to its far side.
+  handle.textContent = `\u2066@${u.handle}\u2069`;
   span.append(name, handle);
   return span;
 }
@@ -193,7 +201,12 @@ async function review(): Promise<void> {
 }
 
 reviewBtn.addEventListener("click", () => void review());
+dismissTipBtn.addEventListener("click", () => {
+  tip.hidden = true;
+  void dismissTip();
+});
 clearCollectedBtn.addEventListener("click", async () => {
+  if (!confirm(t("collected.confirmClear"))) return;
   await clearCollected();
   await renderCollected();
 });

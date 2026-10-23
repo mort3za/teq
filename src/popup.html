@@ -2,40 +2,44 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap" />
+    <link rel="stylesheet" href="fonts.css" />
+    <link rel="stylesheet" href="theme.css" />
     <link rel="stylesheet" href="popup.css" />
     <title>Teq... block'em!</title>
   </head>
   <body>
     <header>
       <h1 data-i18n="popup.title">Teq... block'em!</h1>
-      <label class="switch-field" data-i18n-title="popup.autoCollectTitle" title="Auto-collect matches as you browse X">
-        <span data-i18n="popup.autoCollect">Auto-collect</span>
-        <span class="switch">
-          <input id="autoCollect" type="checkbox" />
-          <span class="slider"></span>
-        </span>
-      </label>
+      <div class="head-actions">
+        <label class="switch-field" data-i18n-title="popup.autoCollectTitle" title="Auto-collect matches as you browse X">
+          <span data-i18n="popup.autoCollect">Auto-collect</span>
+          <span class="switch">
+            <input id="autoCollect" type="checkbox" role="switch" />
+            <span class="slider"></span>
+          </span>
+        </label>
+        <a id="openOptions" class="icon-btn" href="options.html" target="_blank" rel="noreferrer" data-i18n-title="popup.openOptions" data-i18n-aria="popup.openOptions" title="Settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></svg>
+        </a>
+      </div>
     </header>
 
     <div id="error" class="error" hidden></div>
 
     <label class="field">
       <span data-i18n="common.wordsLabel">Words / emoji to match (one per line)</span>
-      <textarea id="words" rows="6" placeholder="crypto&#10;airdrop&#10;🚀"></textarea>
+      <textarea id="words" rows="4" placeholder="crypto&#10;airdrop&#10;🚀"></textarea>
     </label>
 
     <label class="field">
       <span data-i18n="common.tweetWordsLabel">Phrases to match inside tweets (one per line)</span>
-      <textarea id="tweetWords" rows="4" placeholder="free crypto&#10;dm me for"></textarea>
+      <textarea id="tweetWords" rows="2" placeholder="free crypto&#10;dm me for"></textarea>
     </label>
 
     <div id="progress" class="progress" hidden>
       <span class="dot"></span>
       <span id="progressText"></span>
-      <button id="pauseToggle" type="button" class="pause-toggle" aria-label="Pause">⏸</button>
+      <button id="pauseToggle" type="button" class="icon-btn pause-toggle" aria-label="Pause"></button>
     </div>
 
     <section class="collected">
@@ -44,30 +48,36 @@
           <strong id="collectedCount">0</strong>
           <a id="viewCollected" class="link" href="collected.html" target="_blank" rel="noreferrer" data-i18n="popup.collected">collected</a>
         </span>
-        <button id="clearCollected" type="button" class="link" hidden data-i18n="common.clear">Clear</button>
+        <button id="clearCollected" type="button" class="icon-btn danger" hidden data-i18n-title="common.clearList" data-i18n-aria="common.clearList" title="Clear list" aria-label="Clear list">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
+        </button>
       </div>
       <ul id="collectedList" class="collected-list"></ul>
       <p id="collectedEmpty" class="note" data-i18n="popup.nothingCollected">Nothing collected yet.</p>
-      <button id="review" type="button" class="block-btn" disabled data-i18n="popup.reviewAndBlock">Review and block</button>
-      <span id="runStatus" class="runStatus"></span>
+      <button id="review" type="button" class="block-btn" disabled>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="m4.9 4.9 14.2 14.2" /></svg>
+        <span data-i18n="popup.reviewAndBlock">Review and block</span>
+      </button>
+      <p id="runStatus" class="runStatus" role="status"></p>
     </section>
 
     <div class="stats">
       <span class="stats-total">
         <strong id="count">0</strong>
-        <a id="viewAll" href="blocks.html" target="_blank" rel="noreferrer" data-i18n="popup.blocked">blocked</a>
+        <a id="viewAll" class="link" href="blocks.html" target="_blank" rel="noreferrer" data-i18n="popup.blocked">blocked</a>
         <span data-i18n="common.total">total</span>
       </span>
-      <a id="openOptions" class="settings-link" href="options.html" target="_blank" rel="noreferrer">
-        <span class="cog" aria-hidden="true">⚙</span>
-        <span data-i18n="popup.openOptions">Settings</span>
-      </a>
     </div>
 
-    <p class="note" data-i18n="popup.note">
-      Matches are collected as you browse X. Review the list, then block. Blocks are paced apart (configurable in
-      Options) to stay under X's automation radar — keep the X tab open.
-    </p>
+    <div id="tip" class="tip" hidden>
+      <p class="note" data-i18n="popup.note">
+        Matches are collected as you browse X. Review the list, then block. Blocks are paced apart (configurable in
+        Options) to stay under X's automation radar — keep the X tab open.
+      </p>
+      <button id="dismissTip" type="button" class="icon-btn" data-i18n-title="popup.dismissTip" data-i18n-aria="popup.dismissTip" title="Hide this tip" aria-label="Hide this tip">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+      </button>
+    </div>
 
     <script src="popup.js"></script>
   </body>

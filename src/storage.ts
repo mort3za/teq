@@ -104,6 +104,7 @@ const COLLECTED_KEY = "collected";
 const PROGRESS_KEY = "blockProgress";
 const QUEUE_KEY = "blockQueue";
 const IGNORED_KEY = "ignored";
+const TIP_KEY = "tipDismissed";
 const LOG_LIMIT = 500;
 
 export async function getConfig(): Promise<Config> {
@@ -241,4 +242,15 @@ export async function getLastError(): Promise<string | null> {
 
 export async function setLastError(message: string | null): Promise<void> {
   await chrome.storage.local.set({ [ERROR_KEY]: message });
+}
+
+/** True once the user closed the popup's "how it works" tip. One-way: the same
+ * text stays readable in Options, so there is no way (or need) to bring it back. */
+export async function getTipDismissed(): Promise<boolean> {
+  const { [TIP_KEY]: d } = await chrome.storage.local.get(TIP_KEY);
+  return d === true;
+}
+
+export async function dismissTip(): Promise<void> {
+  await chrome.storage.local.set({ [TIP_KEY]: true });
 }
