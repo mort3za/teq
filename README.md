@@ -1,4 +1,4 @@
-# teq
+# Teq
 
 **English** · [فارسی](README.fa.md)
 
@@ -6,7 +6,7 @@ A Chrome extension that finds X.com (Twitter) accounts by their **display name**
 
 You write a few rules (words or emoji). As you scroll X, teq quietly collects everyone whose display name matches — and, if you turn on **Match @username**, their handle too. When you're ready, you review the list and block them in one click. teq then blocks them one at a time, slowly enough that X never sees a bot.
 
-> **Heads up:** Blocking is hard to undo at scale. teq always lets you review and edit the list before anything happens — nothing is blocked automatically.
+> **Heads up:** Blocking is hard to undo at scale. Teq always lets you review and edit the list before anything happens — nothing is blocked automatically.
 
 ---
 
@@ -19,7 +19,7 @@ A ready-to-use build is attached to every [release](https://github.com/mort3za/t
 3. Turn on **Developer mode** (top-right).
 4. Click **Load unpacked** and select the unzipped folder.
 
-The teq icon appears in your toolbar. You're ready.
+The Teq icon appears in your toolbar. You're ready.
 
 > Prefer to build it yourself? See [Build from source](#build-from-source). The full project is also on each release page as _Source code (zip)_.
 
@@ -49,7 +49,7 @@ X treats rapid-fire blocking as bot activity, so teq deliberately goes slow and 
 - **Resilient** — a run survives tab reloads and browser restarts; it picks up where it left off. Just keep (or reopen) an X tab so it has somewhere to run.
 - **Backs off on pushback** — if X returns a 401/403/429, the run pauses (it doesn't crash) and keeps the rest queued. Resume from the popup after a break.
 
-A dot on the toolbar icon shows the state: **green** = blocking, **yellow** = paused. teq never blocks your own account.
+A dot on the toolbar icon shows the state: **green** = blocking, **yellow** = paused. Teq never blocks your own account.
 
 ---
 
@@ -99,7 +99,7 @@ bun test
 
 After rebuilding, click the **reload ↻** icon on the extension card in `chrome://extensions` to load the new code.
 
-> **No signing key needed.** You don't need `key.pem` to build or run teq — it's the maintainer's private key for publishing signed releases and isn't part of the repo. The public half is already in `manifest.json` (`"key"`), which is all Chrome needs to give your unpacked build a stable ID.
+> **No signing key needed.** You don't need `key.pem` to build or run Teq — it's the maintainer's private key for publishing signed releases and isn't part of the repo. The public half is already in `manifest.json` (`"key"`), which is all Chrome needs to give your unpacked build a stable ID.
 
 ---
 
