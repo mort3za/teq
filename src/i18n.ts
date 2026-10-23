@@ -49,7 +49,7 @@ const en: Dict = {
   "popup.collected": "collected",
   "popup.openOptions": "Settings",
   "popup.note":
-    "Matches are collected as you browse X. Review the list, then block. Blocks are paced apart (configurable in Settings) to stay under X's automation radar — keep the X tab open.",
+    "Matches are collected as you browse X. Review the list, then block. Blocks are paced apart (configurable in Settings) to stay within X's rate limits — keep the X tab open.",
   "popup.dismissTip": "Hide this tip",
   "popup.progress.blocking": "Blocking {done} of {total}…",
   "popup.progress.paused": "Paused — {done} of {total}",
@@ -85,18 +85,18 @@ const en: Dict = {
   "options.advanced": "Advanced",
   "options.advancedHint": "Pacing, rate limits, and auto-scroll",
   "options.warning":
-    "⚠️ These pacing and rate limits are tuned to keep blocking under X's automation radar. Raising them — or blocking faster than the recommended ranges — makes your activity look automated, which can get your X account rate-limited, temporarily locked, or permanently suspended. Only change these if you understand the risk.",
+    "⚠️ These pacing and rate limits are tuned to keep blocking within X's rate limits. Raising them — or blocking faster than the recommended ranges — can get your X account rate-limited, temporarily locked, or permanently suspended. Only change these if you understand the risk.",
   "options.limitsTitle": "Why these limits aren't exact",
   "options.limitsTrust":
-    "X doesn't enforce one fixed limit — it's calculated live from your account's standing. Older accounts, accounts with a linked phone number, and paid X Premium accounts tolerate far more. A brand-new, unverified free account can get flagged after as few as ~50 blocks in a day, while an established Premium account may clear hundreds. Lower the caps below if your account is new or unverified; raise them only cautiously if it's well-established.",
+    "X doesn't enforce one fixed limit — it's calculated live from your account's standing. Older accounts, accounts with a linked phone number, and paid X Premium accounts tolerate far more. A brand-new, unverified free account can hit a limit after as few as ~50 blocks in a day, while an established Premium account may clear hundreds. Lower the caps below if your account is new or unverified; raise them only cautiously if it's well-established.",
   "options.limitsWindow":
-    "X tracks actions in short rolling windows (typically 15 minutes and 1 hour). A 24-hour lockout is usually triggered by short-term velocity, not a daily total — repeatedly hitting the short-window speed makes you look automated, and X locks you out for the day. That's why \"Seconds between blocks\" matters more than the daily cap: keeping each block slow and well-spaced is your best protection.",
+    "X tracks actions in short rolling windows (typically 15 minutes and 1 hour). A 24-hour lockout is usually triggered by short-term velocity, not a daily total — repeatedly hitting the short-window limit can make X lock you out for the day. That's why \"Seconds between blocks\" matters more than the daily cap: keeping each block slow and well-spaced is your best protection.",
   "options.scanLabel": "Seconds between scans",
   "options.scanHint":
     "How often the page is automatically scanned for new matches while auto-collect is on.",
   "options.pacingLabel": "Seconds between blocks",
   "options.pacingHint":
-    "Each block waits this long (plus a little random jitter) before the next. X flags rapid-fire blocking as automation — 30s or more is recommended.",
+    "Each block waits this long (plus a little random jitter) before the next. X limits how fast an account can block — 30s or more is recommended.",
   "options.maxPerHourLabel": "Max blocks per hour",
   "options.maxPerHourHint":
     "The run pauses once this many blocks happen within any rolling 60-minute window. Safe range is ~30–50; 0 disables the limit.",
@@ -241,7 +241,7 @@ const fa: Dict = {
   "popup.collected": "جمع‌آوری‌شده",
   "popup.openOptions": "تنظیمات",
   "popup.note":
-    "موارد منطبق هنگام مرور X جمع‌آوری می‌شوند. فهرست را بررسی کنید، سپس بلاک کنید. بلاک‌ها با فاصلهٔ زمانی (قابل تنظیم در تنظیمات) انجام می‌شوند تا از رادار خودکارسازی X دور بمانند — تب X را باز نگه دارید.",
+    "موارد منطبق هنگام مرور X جمع‌آوری می‌شوند. فهرست را بررسی کنید، سپس بلاک کنید. بلاک‌ها با فاصلهٔ زمانی (قابل تنظیم در تنظیمات) انجام می‌شوند تا در محدودهٔ محدودیت‌های نرخ X بمانند — تب X را باز نگه دارید.",
   "popup.dismissTip": "پنهان کردن این راهنما",
   "popup.progress.blocking": "در حال بلاک کردن {done} از {total}…",
   "popup.progress.paused": "متوقف شد — {done} از {total}",
@@ -274,19 +274,20 @@ const fa: Dict = {
   "options.matchHandleHint":
     "کلمات شما را علاوه بر نام نمایشی، با @نام‌کاربری هم تطبیق می‌دهد. به‌طور پیش‌فرض خاموش است — تنها نام نمایشی تطبیق داده می‌شود.",
   "options.advanced": "پیشرفته",
+  "options.advancedHint": "فاصلهٔ بلاک‌ها، سقف‌ها و اسکرول خودکار",
   "options.warning":
-    "⚠️ این فاصله‌ها و محدودیت‌های نرخ طوری تنظیم شده‌اند که بلاک زیر رادار خودکارسازی X بماند. افزایش آن‌ها — یا بلاک سریع‌تر از بازه‌های توصیه‌شده — فعالیت شما را خودکار جلوه می‌دهد و می‌تواند حساب X شما را محدود، موقتاً قفل یا برای همیشه معلق کند. فقط در صورتی این‌ها را تغییر دهید که خطر را می‌دانید.",
+    "⚠️ این فاصله‌ها و محدودیت‌های نرخ طوری تنظیم شده‌اند که بلاک در محدودهٔ محدودیت‌های نرخ X بماند. افزایش آن‌ها — یا بلاک سریع‌تر از بازه‌های توصیه‌شده — می‌تواند حساب X شما را محدود، موقتاً قفل یا برای همیشه معلق کند. فقط در صورتی این‌ها را تغییر دهید که خطر را می‌دانید.",
   "options.limitsTitle": "چرا این محدودیت‌ها دقیق نیستند",
   "options.limitsTrust":
-    "X یک محدودیت ثابت اعمال نمی‌کند — این مقدار به‌صورت زنده بر اساس اعتبار حساب شما محاسبه می‌شود. حساب‌های قدیمی‌تر، حساب‌هایی با شمارهٔ تلفن متصل، و حساب‌های پولی X Premium تحمل بسیار بیشتری دارند. یک حساب رایگانِ کاملاً جدید و تأییدنشده ممکن است تنها پس از حدود ۵۰ بلاک در روز علامت‌گذاری شود، در حالی که یک حساب جاافتادهٔ Premium می‌تواند صدها مورد را بدون مشکل انجام دهد. اگر حساب شما جدید یا تأییدنشده است سقف‌های زیر را پایین بیاورید؛ تنها در صورت جاافتاده بودن حساب، با احتیاط آن‌ها را بالا ببرید.",
+    "سایت X یک محدودیت ثابت اعمال نمی‌کند — این مقدار به‌صورت زنده بر اساس اعتبار حساب شما محاسبه می‌شود. حساب‌های قدیمی‌تر، حساب‌هایی با شمارهٔ تلفن متصل، و حساب‌های پولی X Premium تحمل بسیار بیشتری دارند. یک حساب رایگانِ کاملاً جدید و تأییدنشده ممکن است تنها پس از حدود ۵۰ بلاک در روز به محدودیت برسد، در حالی که یک حساب جاافتادهٔ Premium می‌تواند صدها مورد را بدون مشکل انجام دهد. اگر حساب شما جدید یا تأییدنشده است سقف‌های زیر را پایین بیاورید؛ تنها در صورت جاافتاده بودن حساب، با احتیاط آن‌ها را بالا ببرید.",
   "options.limitsWindow":
-    "X کنش‌ها را در بازه‌های متحرک کوتاه (معمولاً ۱۵ دقیقه و ۱ ساعت) دنبال می‌کند. قفل ۲۴ ساعته معمولاً به‌خاطر سرعت کوتاه‌مدت رخ می‌دهد، نه مجموع روزانه — برخورد مکرر به محدودیت سرعتِ بازهٔ کوتاه شما را خودکار جلوه می‌دهد و X برای آن روز قفل‌تان می‌کند. به همین دلیل «ثانیه بین هر بلاک» مهم‌تر از سقف روزانه است: آهسته و بافاصله نگه داشتن هر بلاک بهترین محافظت شماست.",
+    "سایت X کنش‌ها را در بازه‌های متحرک کوتاه (معمولاً ۱۵ دقیقه و ۱ ساعت) دنبال می‌کند. قفل ۲۴ ساعته معمولاً به‌خاطر سرعت کوتاه‌مدت رخ می‌دهد، نه مجموع روزانه — برخورد مکرر به محدودیت بازهٔ کوتاه می‌تواند باعث شود X برای آن روز قفل‌تان کند. به همین دلیل «ثانیه بین هر بلاک» مهم‌تر از سقف روزانه است: آهسته و بافاصله نگه داشتن هر بلاک بهترین محافظت شماست.",
   "options.scanLabel": "ثانیه بین هر اسکن",
   "options.scanHint":
     "هر چند وقت یک‌بار صفحه به‌طور خودکار برای موارد منطبق جدید اسکن شود، تا وقتی جمع‌آوری خودکار روشن است.",
   "options.pacingLabel": "ثانیه بین هر بلاک",
   "options.pacingHint":
-    "هر بلاک این مدت (به‌علاوهٔ کمی تأخیر تصادفی) پیش از بعدی صبر می‌کند. X بلاک پرسرعت را خودکار تشخیص می‌دهد — ۳۰ ثانیه یا بیشتر توصیه می‌شود.",
+    "هر بلاک این مدت (به‌علاوهٔ کمی تأخیر تصادفی) پیش از بعدی صبر می‌کند. سایت X سرعت بلاک هر حساب را محدود می‌کند — ۳۰ ثانیه یا بیشتر توصیه می‌شود.",
   "options.maxPerHourLabel": "حداکثر بلاک در ساعت",
   "options.maxPerHourHint":
     "اجرا پس از این تعداد بلاک در هر بازهٔ متحرک ۶۰ دقیقه‌ای متوقف می‌شود. بازهٔ ایمن حدود ۳۰ تا ۵۰ است؛ ۰ محدودیت را غیرفعال می‌کند.",

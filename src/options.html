@@ -42,7 +42,7 @@
           <p class="info-title" data-i18n="options.howTitle">How it works</p>
           <p data-i18n="popup.note">
             Matches are collected as you browse X. Review the list, then block. Blocks are paced apart (configurable in
-            Settings) to stay under X's automation radar — keep the X tab open.
+            Settings) to stay within X's rate limits — keep the X tab open.
           </p>
         </aside>
 
@@ -121,10 +121,9 @@
           <div class="advanced-body">
 
           <p class="warning" data-i18n="options.warning">
-            ⚠️ These pacing and rate limits are tuned to keep blocking under X's automation radar. Raising them — or
-            blocking faster than the recommended ranges — makes your activity look automated, which can get your X
-            account rate-limited, temporarily locked, or permanently suspended. Only change these if you understand
-            the risk.
+            ⚠️ These pacing and rate limits are tuned to keep blocking within X's rate limits. Raising them — or
+            blocking faster than the recommended ranges — can get your X account rate-limited, temporarily locked, or
+            permanently suspended. Only change these if you understand the risk.
           </p>
 
           <aside class="info">
@@ -132,14 +131,14 @@
             <p data-i18n="options.limitsTrust">
               X doesn't enforce one fixed limit — it's calculated live from your account's standing. Older accounts,
               accounts with a linked phone number, and paid X Premium accounts tolerate far more. A brand-new,
-              unverified free account can get flagged after as few as ~50 blocks in a day, while an established Premium
+              unverified free account can hit a limit after as few as ~50 blocks in a day, while an established Premium
               account may clear hundreds. Lower the caps below if your account is new or unverified; raise them only
               cautiously if it's well-established.
             </p>
             <p data-i18n="options.limitsWindow">
               X tracks actions in short rolling windows (typically 15 minutes and 1 hour). A 24-hour lockout is usually
-              triggered by short-term velocity, not a daily total — repeatedly hitting the short-window speed makes you
-              look automated, and X locks you out for the day. That's why "Seconds between blocks" matters more than the
+              triggered by short-term velocity, not a daily total — repeatedly hitting the short-window limit can make
+              X lock you out for the day. That's why "Seconds between blocks" matters more than the
               daily cap: keeping each block slow and well-spaced is your best protection.
             </p>
           </aside>
@@ -154,8 +153,8 @@
             <label for="pacing" data-i18n="options.pacingLabel">Seconds between blocks</label>
             <input id="pacing" type="number" min="1" step="1" />
             <p class="hint" data-i18n="options.pacingHint">
-              Each block waits this long (plus a little random jitter) before the next. X flags rapid-fire blocking as
-              automation — 30s or more is recommended.
+              Each block waits this long (plus a little random jitter) before the next. X limits how fast an account
+              can block — 30s or more is recommended.
             </p>
           </div>
 
@@ -181,6 +180,7 @@
             <button id="resetAdvanced" type="button" class="action"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg><span data-i18n="options.reset">Reset to defaults</span></button>
             <p class="hint" data-i18n="options.resetHint">Restore the recommended scan, pacing, and rate-limit values above.</p>
           </div>
+
           <div class="field">
             <label class="switch-field">
               <span class="switch">

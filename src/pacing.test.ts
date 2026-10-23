@@ -104,6 +104,7 @@ test("fmtDuration formats seconds, minutes, and hours", () => {
   expect(fmtDuration(2 * HOUR + 5 * MIN)).toBe("2h 5m");
   expect(fmtDuration(-1000)).toBe("0s");
 });
+
 test("the auto-scroll delay stays between the min and max", () => {
   expect(scrollDelayMs(0)).toBe(SCROLL_MIN_MS);
   expect(scrollDelayMs(0.5)).toBe((SCROLL_MIN_MS + SCROLL_MAX_MS) / 2);

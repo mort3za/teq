@@ -41,11 +41,11 @@ That's the whole loop: **rules → collect → review → block.**
 
 ---
 
-## Why it won't get you flagged
+## How it stays within X's limits
 
-X treats rapid-fire blocking as bot activity, so teq deliberately goes slow and stays within human-looking limits.
+X limits how fast an account can block, so Teq deliberately goes slow.
 
-- **Paced** — waits ~30s between blocks (plus a little random jitter, so the rhythm isn't mechanical).
+- **Paced** — waits ~30s between blocks (plus a little random jitter).
 - **Rate-capped** — stops after 40 blocks/hour or 250/day by default. These are rolling windows tracked against your whole block history, not a single run, so they hold across reloads.
 - **Self-resuming** — when a cap is hit, the run waits and continues on its own once the window clears. The popup shows a "resumes in…" countdown.
 - **Resilient** — a run survives tab reloads and browser restarts; it picks up where it left off. Just keep (or reopen) an X tab so it has somewhere to run.
@@ -111,3 +111,13 @@ After rebuilding, click the **reload ↻** icon on the extension card in `chrome
 - Blocks use X's own `blocks/create` API — the exact call the site makes when you click "Block." It runs from the X tab, so your cookies and CSRF token ride along just like the real app.
 - The bearer token in the code is X's public web-app token, not a secret.
 - Collecting only sees what's currently rendered — scroll to load more accounts, and they get picked up on the next scan.
+
+---
+
+## Disclaimer
+
+Teq is an independent, open-source project. It is not affiliated with, endorsed by, or supported by X Corp.
+
+Teq runs inside your own logged-in X tab and sends the same requests the x.com website sends. It does not use X's official developer API. X's [Terms of Service](https://x.com/en/tos) limit automated use of the site and access through interfaces other than the ones X publishes, so X may treat some of what Teq does as outside those terms. X can limit, lock, or suspend accounts at its own discretion.
+
+You are responsible for how you use Teq on your account. Use it at your own risk.

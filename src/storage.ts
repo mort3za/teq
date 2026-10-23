@@ -15,10 +15,10 @@ export interface Config {
   /** Seconds between automatic page scans for new matches. */
   scanSeconds: number;
   /** Seconds to wait between blocks; positive random jitter is added on top.
-   * Kept slow on purpose — X flags rapid-fire blocking as automation. */
+   * Kept slow on purpose — X rate-limits how fast an account can block. */
   pacingSeconds: number;
   /** Max blocks allowed within any rolling 60-minute window (0 = no limit).
-   * The run pauses when this is reached. X flags high block velocity. */
+   * The run pauses when this is reached. X rate-limits block velocity. */
   maxPerHour: number;
   /** Max blocks allowed within any rolling 24-hour window (0 = no limit).
    * The run pauses when this is reached. */
@@ -263,6 +263,7 @@ export async function getTipDismissed(): Promise<boolean> {
 export async function dismissTip(): Promise<void> {
   await chrome.storage.local.set({ [TIP_KEY]: true });
 }
+
 /** Epoch-ms until which automatic requests (auto-scroll, block run) hold still
  * because X answered 429 "too many requests". 0 or past = not limited. */
 export async function getRateLimitedUntil(): Promise<number> {

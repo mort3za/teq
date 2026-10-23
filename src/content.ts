@@ -36,8 +36,8 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 let ownHandle: string | null = null;
 
 // Handles queued for blocking; drained one at a time, paced apart. The delay
-// between blocks is configurable (Options page) — X flags rapid-fire blocking
-// as automation — and up to 30% positive random jitter is added on top.
+// between blocks is configurable (Options page) — X rate-limits how fast an
+// account can block — and up to 30% positive random jitter is added on top.
 const blockQueue: string[] = [];
 let draining = false;
 // Epoch-ms of the last block attempt, failed ones included (those leave no log
@@ -94,7 +94,8 @@ let scanning: Promise<number> | null = null;
 
 /**
  * Scan the currently-rendered page for matches and add new ones to the
- * collected list. Returns how many fresh matches were added.
+ * collected list. Returns how many fresh matches were added. A call made while
+ * a scan runs gets that scan's result.
  */
 function collect(): Promise<number> {
   scanning ??= scan().finally(() => (scanning = null));

@@ -23,7 +23,7 @@ Default to using Bun instead of Node.js.
 MV3 Chrome extension. On x.com it scans rendered user cells, collects accounts
 whose display name (or @handle) matches your word/emoji rules, lets you review
 them, then blocks the chosen ones via X's own `blocks/create` API — paced apart
-so X doesn't flag it as automation. See `README.md` for the user-facing guide.
+to stay within X's rate limits. See `README.md` for the user-facing guide.
 
 ## Layout
 

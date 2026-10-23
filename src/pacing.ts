@@ -1,8 +1,8 @@
 // Pure timing logic for the paced block queue (no DOM/chrome) — unit-testable.
 
-/** Fraction of the base pacing added as positive random jitter. X flags
- * rapid-fire blocking as automation, so the delay is never below the base and
- * up to this much is sprinkled on top to make the cadence look less mechanical. */
+/** Fraction of the base pacing added as positive random jitter. X rate-limits
+ * how fast an account can block, so the delay is never below the base and up
+ * to this much is added on top. */
 export const PACING_JITTER = 0.3;
 
 /**
@@ -78,6 +78,7 @@ export function fmtDuration(ms: number): string {
   const h = Math.floor(m / 60);
   return `${h}h ${m % 60}m`;
 }
+
 /** Shortest and longest pause between auto-scroll steps. Random in between,
  * which spreads out the page loads instead of firing them on a fixed clock. */
 export const SCROLL_MIN_MS = 1500;
