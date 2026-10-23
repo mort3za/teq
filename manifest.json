@@ -38,7 +38,8 @@
     {
       "resources": [
         "fonts.css",
-        "fonts/*"
+        "fonts/*",
+        "icons/icon48.png"
       ],
       "matches": [
         "*://x.com/*",

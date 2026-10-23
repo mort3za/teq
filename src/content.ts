@@ -6,6 +6,7 @@ import { matchReason } from "./matcher.ts";
 import { extractUser, richText, tweetTextEl } from "./extract.ts";
 import { blockUser, BlockError } from "./blocker.ts";
 import { openReview, type BlockProgress } from "./review.ts";
+import { startMarks } from "./marks.ts";
 import { blockDelayMs, capReached, capRetryMs, fmtDuration } from "./pacing.ts";
 import { setLang, t } from "./i18n.ts";
 import {
@@ -352,6 +353,7 @@ async function resumeInterruptedRun(): Promise<void> {
 function start(): void {
   detectOwnHandle();
   void resumeInterruptedRun();
+  startMarks();
 
   // Auto-scan the page so matches are collected without the popup having to
   // ask. The next scan is scheduled only after the previous one finishes (no
