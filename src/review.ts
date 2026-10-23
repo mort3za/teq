@@ -122,6 +122,8 @@ const STYLE = `
     font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .who .handle { color: var(--muted); font-size: 12px; }
+  .who .handle a { color: inherit; text-decoration: none; }
+  .who .handle a:hover { text-decoration: underline; }
   /* Names set their own direction (dir=auto); keep them aligned with the overlay. */
   .backdrop[dir="ltr"] .who { text-align: left; }
   .backdrop[dir="rtl"] .who { text-align: right; }
@@ -301,9 +303,14 @@ function cell(u: CollectedUser): HTMLDivElement {
   name.dir = "auto"; // a Latin name in the RTL overlay truncates at its own end
   const handle = document.createElement("span");
   handle.className = "handle";
+  const link = document.createElement("a");
+  link.href = `https://x.com/${u.handle}`;
+  link.target = "_blank";
+  link.rel = "noreferrer";
   // ⁦…⁩ isolates the handle so RTL layout can't move the "@" to its far side.
-  const at = `\u2066@${u.handle}\u2069`;
-  handle.textContent = u.lang ? `${at} · ${langName(u.lang)}` : at;
+  link.textContent = `\u2066@${u.handle}\u2069`;
+  handle.append(link);
+  if (u.lang) handle.append(` · ${langName(u.lang)}`);
   who.append(name, handle);
   label.append(cb, who);
 
