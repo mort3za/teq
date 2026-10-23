@@ -214,6 +214,18 @@ async function waitOutCap(): Promise<void> {
 
 async function drain(): Promise<void> {
   draining = true;
+  try {
+    await drainQueue();
+  } finally {
+    // Always release the flag: a stuck `draining` (e.g. a storage call threw)
+    // would make every later enqueue skip starting a drain, freezing at 0 of N.
+    draining = false;
+    runPort?.disconnect();
+    runPort = null;
+  }
+}
+
+async function drainQueue(): Promise<void> {
   // Keep the service worker alive (and the icon badge blinking) for the run.
   runPort = chrome.runtime.connect({ name: "block-run" });
   while (blockQueue.length) {
@@ -284,15 +296,11 @@ async function drain(): Promise<void> {
       await sleep(blockDelayMs(cfg.pacingSeconds));
     }
   }
-  draining = false;
   // The queue is empty: everything queued was blocked or dropped on a
   // non-fatal error. Clear any leftover "in progress" flags and report done.
   await clearBlocking();
   await setBlockQueue([]);
   await reportProgress({ done: blockDone, total: blockTotal, phase: "done" });
-  // Disconnect → service worker stops blinking and clears the badge.
-  runPort?.disconnect();
-  runPort = null;
 }
 
 /**
