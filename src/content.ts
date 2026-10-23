@@ -36,6 +36,12 @@ let ownHandle: string | null = null;
 // as automation — and up to 30% positive random jitter is added on top.
 const blockQueue: string[] = [];
 let draining = false;
+// Epoch-ms of the last block attempt, failed ones included (those leave no log
+// entry). Paces the next attempt together with the log's newest entry.
+let lastAttemptAt = 0;
+// Jitter draw for the current gap; redrawn per attempt so re-checking the wait
+// doesn't roll a new delay each time.
+let gapRand = Math.random();
 // Pause flag for the active run — the drain loop stops processing while set, but
 // keeps the queue intact so the run can be resumed from the popup.
 let paused = false;
@@ -238,11 +244,23 @@ async function drainQueue(): Promise<void> {
     // (the oldest blocks age past the trailing hour/day boundary and free a
     // slot) and auto-resume, rather than blocking through X's thresholds.
     const cfg = await getConfig();
-    const cap = capReached((await getLog()).map((e) => e.at), cfg.maxPerHour, cfg.maxPerDay);
+    const log = await getLog();
+    const cap = capReached(log.map((e) => e.at), cfg.maxPerHour, cfg.maxPerDay);
     if (cap) {
       await waitOutCap();
       // Re-evaluate from the top: a cleared cap falls through to blocking; a
       // user pause taken during the wait is caught by the wait-while-paused gate.
+      continue;
+    }
+
+    // Pace from the last block, not from the run start: a fresh run blocks its
+    // first target right away, unless a block happened recently (an earlier
+    // run, or the one before a tab reload) — then it waits out the remainder.
+    const lastAt = Math.max(lastAttemptAt, log[0]?.at ?? 0);
+    const waitMs = lastAt + blockDelayMs(cfg.pacingSeconds, gapRand) - Date.now();
+    if (waitMs > 0) {
+      await sleep(waitMs);
+      // Re-check from the top: the user may have paused, or the queue changed.
       continue;
     }
 
@@ -260,6 +278,8 @@ async function drainQueue(): Promise<void> {
       continue;
     }
 
+    lastAttemptAt = Date.now();
+    gapRand = Math.random();
     try {
       await blockUser(handle);
       await addLog({
@@ -279,8 +299,7 @@ async function drainQueue(): Promise<void> {
       await setLastError(message);
       // Rate-limited or auth-rejected: pause the run (resumable) rather than
       // killing it. The target stays at the front of the queue so resuming
-      // retries it, and we skip the pacing delay below — the wait-while-paused
-      // gate at the loop top holds.
+      // retries it — the wait-while-paused gate at the loop top holds.
       if (status === 429 || status === 403 || status === 401) {
         pauseRun(message);
         continue;
@@ -291,13 +310,10 @@ async function drainQueue(): Promise<void> {
     }
 
     await reportProgress({ done: blockDone, total: blockTotal, phase: "blocking" });
-
-    if (blockQueue.length) {
-      await sleep(blockDelayMs(cfg.pacingSeconds));
-    }
   }
   // The queue is empty: everything queued was blocked or dropped on a
   // non-fatal error. Clear any leftover "in progress" flags and report done.
+  // (drain's finally disconnects the port → the service worker clears the badge.)
   await clearBlocking();
   await setBlockQueue([]);
   await reportProgress({ done: blockDone, total: blockTotal, phase: "done" });
