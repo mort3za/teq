@@ -77,7 +77,31 @@ No. All code is in the package.
 
 ### Data usage
 
-Teq keeps the display names, @usernames and tweet text of matched accounts (website content) in `chrome.storage` on the user's computer. It does not send this data to the developer or to other services. It sends only block requests to X. Privacy policy URL: https://github.com/mort3za/teq/blob/main/PRIVACY.md
+**What user data do you plan to collect from users now or in the future?**
+
+| Field                             | Value     | Why                                                                                                       |
+| --------------------------------- | --------- | --------------------------------------------------------------------------------------------------------- |
+| Personally identifiable information | Unchecked | Teq does not read the user's own name, e-mail or other personal data.                                     |
+| Health information                | Unchecked |                                                                                                           |
+| Financial and payment information | Unchecked |                                                                                                           |
+| Authentication information        | Unchecked | Teq does not keep or read passwords. It copies X's `ct0` CSRF cookie into the block request to X only, as X's own website does. It does not store it or send it anywhere else. |
+| Personal communications           | Unchecked | Teq does not read direct messages.                                                                        |
+| Location                          | Unchecked |                                                                                                           |
+| Web history                       | Unchecked | Teq runs only on x.com and does not keep a list of pages.                                                 |
+| User activity                     | Unchecked | Teq does not record clicks, scroll, mouse or keys. It only reads the accounts that X shows on the page.   |
+| Website content                   | **Checked** | Teq keeps the display name, @username, tweet language and tweet text of the matched accounts, in `chrome.storage` on the user's computer. |
+
+**I certify that the following disclosures are true:** check all three.
+
+| Field                                                                                              | Value       |
+| -------------------------------------------------------------------------------------------------- | ----------- |
+| I do not sell or transfer user data to third parties, outside of the approved use cases            | **Checked** |
+| I do not use or transfer user data for purposes that are unrelated to my item's single purpose     | **Checked** |
+| I do not use or transfer user data to determine creditworthiness or for lending purposes           | **Checked** |
+
+**Privacy policy URL:** https://github.com/mort3za/teq/blob/main/PRIVACY.md
+
+Teq does not send this data to the developer or to other services. It sends only block requests to X.
 
 ## Distribution
 
