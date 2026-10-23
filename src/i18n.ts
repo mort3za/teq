@@ -15,6 +15,8 @@ const en: Dict = {
   "nav.collected": "Collected",
   "nav.ignored": "Ignored",
   "nav.options": "Options",
+  "nav.credits": "Credits",
+  "nav.donate": "Donate",
 
   // shared
   "common.total": "total",
@@ -119,6 +121,32 @@ const en: Dict = {
   "blocks.empty": "No blocked accounts yet.",
   "blocks.confirmClear": "Clear the entire blocked-accounts list? This can't be undone.",
 
+  // credits page
+  "credits.title": "Credits",
+  "credits.intro": "Teq uses these open source projects. Thank you!",
+  "credits.vazirmatnUse": "The font of the extension pages.",
+  "credits.lucideUse": "The icons on the Donate page.",
+
+  // donate page
+  "donate.title": "Keep Teq free",
+  "donate.intro":
+    "Teq is free and open source. It has no ads and no paid plan. If it helps you, you can support its development.",
+  "donate.sponsor": "Sponsor on GitHub",
+  "donate.monthly": "Monthly or one-time, no fee",
+  "donate.paysFor": "Your support pays for",
+  "donate.features": "New features",
+  "donate.languages": "More languages",
+  "donate.bugs": "Bug fixes",
+  "donate.otherWays": "Other ways to help",
+  "donate.noMoney": "No money? These help a lot too.",
+  "donate.star": "Star the repo",
+  "donate.starHint": "More stars, more people find it.",
+  "donate.report": "Report a bug or idea",
+  "donate.reportHint": "Tell us what to fix or add.",
+  "donate.tell": "Tell a friend",
+  "donate.copied": "Link copied!",
+  "donate.copy": "Click to copy the link.",
+
   // review overlay (Shadow DOM on x.com)
   "review.title": "Review & block",
   "review.searchPlaceholder": "Search name or @handle",
@@ -148,6 +176,8 @@ const fa: Dict = {
   "nav.blocked": "مسدودشده‌ها",
   "nav.collected": "جمع‌آوری‌شده‌ها",
   "nav.options": "تنظیمات",
+  "nav.credits": "قدردانی",
+  "nav.donate": "حمایت مالی",
 
   "common.total": "مجموع",
   "common.clear": "پاک کردن",
@@ -245,6 +275,30 @@ const fa: Dict = {
   "blocks.title": "حساب‌های مسدودشده",
   "blocks.empty": "هنوز حسابی مسدود نشده.",
   "blocks.confirmClear": "کل فهرست حساب‌های مسدودشده پاک شود؟ این کار قابل بازگشت نیست.",
+
+  "credits.title": "قدردانی",
+  "credits.intro": "افزونهٔ Teq از این پروژه‌های متن‌باز استفاده می‌کند. سپاس!",
+  "credits.vazirmatnUse": "قلم صفحه‌های افزونه.",
+  "credits.lucideUse": "آیکون‌های صفحهٔ حمایت مالی.",
+
+  "donate.title": "کمک کنید Teq رایگان بماند",
+  "donate.intro":
+    "افزونهٔ Teq رایگان و متن‌باز است. نه تبلیغ دارد و نه طرح پولی. اگر به کارتان می‌آید، می‌توانید از توسعهٔ آن حمایت کنید.",
+  "donate.sponsor": "حمایت در GitHub",
+  "donate.monthly": "ماهانه یا یک‌باره، بدون کارمزد",
+  "donate.paysFor": "حمایت شما هزینهٔ این‌ها را می‌دهد",
+  "donate.features": "قابلیت‌های تازه",
+  "donate.languages": "زبان‌های بیشتر",
+  "donate.bugs": "رفع اشکال",
+  "donate.otherWays": "راه‌های دیگر کمک",
+  "donate.noMoney": "پول ندارید؟ این‌ها هم خیلی کمک می‌کنند.",
+  "donate.star": "به مخزن ستاره بدهید",
+  "donate.starHint": "ستارهٔ بیشتر یعنی افراد بیشتری آن را پیدا می‌کنند.",
+  "donate.report": "گزارش اشکال یا ایده",
+  "donate.reportHint": "بگویید چه چیزی را درست یا اضافه کنیم.",
+  "donate.tell": "به یک دوست بگویید",
+  "donate.copied": "پیوند کپی شد!",
+  "donate.copy": "برای کپی پیوند کلیک کنید.",
 
   "review.title": "بررسی و مسدودسازی",
   "review.searchPlaceholder": "جستجوی نام یا @نام‌کاربری",

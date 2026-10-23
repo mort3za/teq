@@ -11,7 +11,9 @@ const OUT = "dist";
 
 async function build(): Promise<void> {
   const result = await Bun.build({
-    entrypoints: ["src/content.ts", "src/popup.ts", "src/blocks.ts", "src/collected.ts", "src/ignored.ts", "src/options.ts", "src/background.ts"],
+    entrypoints: ["src/content.ts", "src/popup.ts", "src/blocks.ts", "src/collected.ts", "src/ignored.ts", "src/options.ts", "src/credits.ts", "src/donate.ts", "src/background.ts"],
+    // Explicit root: with 9+ entrypoints Bun otherwise nests output under dist/src/.
+    root: "src",
     outdir: OUT,
     target: "browser",
     format: "iife",
@@ -32,6 +34,8 @@ async function build(): Promise<void> {
     ["collected.html", "src/collected.html"],
     ["ignored.html", "src/ignored.html"],
     ["options.html", "src/options.html"],
+    ["credits.html", "src/credits.html"],
+    ["donate.html", "src/donate.html"],
     ["icons/icon16.png", "icons/icon16.png"],
     ["icons/icon32.png", "icons/icon32.png"],
     ["icons/icon48.png", "icons/icon48.png"],
