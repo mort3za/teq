@@ -38,8 +38,11 @@ const en: Dict = {
   "popup.autoCollect": "Auto-collect",
   "popup.autoCollectTitle": "Auto-collect matches as you browse X",
   "popup.nothingCollected": "Nothing collected yet.",
+  "popup.nothingToReview": "Nothing new to review.",
   "popup.reviewAndBlock": "Review and block",
   "popup.blocked": "blocked",
+  "popup.total": "in total",
+  "popup.inProgress": "{n} in progress",
   "popup.collected": "collected",
   "popup.openOptions": "Settings",
   "popup.note":
@@ -201,8 +204,11 @@ const fa: Dict = {
   "popup.autoCollect": "جمع‌آوری خودکار",
   "popup.autoCollectTitle": "جمع‌آوری خودکار موارد منطبق هنگام مرور X",
   "popup.nothingCollected": "هنوز چیزی جمع‌آوری نشده.",
+  "popup.nothingToReview": "مورد تازه‌ای برای بررسی نیست.",
   "popup.reviewAndBlock": "بررسی و بلاک",
   "popup.blocked": "بلاک‌شده",
+  "popup.total": "در مجموع",
+  "popup.inProgress": "در حال بلاک: {n}",
   "popup.collected": "جمع‌آوری‌شده",
   "popup.openOptions": "تنظیمات",
   "popup.note":

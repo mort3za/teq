@@ -236,6 +236,13 @@ header .switch-field:has(input:checked) {
   gap: 8px;
 }
 
+.stats-progress::before {
+  content: "·";
+  /* The start side already has the inline space before the span. */
+  margin-inline: 2px 6px;
+  color: var(--muted);
+}
+
 /* Square button holding one SVG icon (settings, clear list, pause, close tip).
    Every one of them hovers the same way. */
 .icon-btn {

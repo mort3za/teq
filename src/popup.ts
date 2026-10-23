@@ -26,6 +26,7 @@ const tweetWords = $<HTMLTextAreaElement>("tweetWords");
 const autoCollect = $<HTMLInputElement>("autoCollect");
 const errorBox = $<HTMLDivElement>("error");
 const count = $<HTMLElement>("count");
+const inProgress = $<HTMLElement>("inProgress");
 const runStatus = $<HTMLElement>("runStatus");
 const collectedList = $<HTMLUListElement>("collectedList");
 const collectedCount = $<HTMLElement>("collectedCount");
@@ -159,12 +160,20 @@ function row(u: CollectedUser): HTMLLIElement {
 }
 
 async function renderCollected(): Promise<void> {
-  const collected = [...(await getCollected())].reverse();
+  const all = [...(await getCollected())].reverse();
+  // Already reviewed and queued for blocking → counted under "in progress", not
+  // here. Same filter as the review overlay, so the count matches what it shows.
+  const collected = all.filter((u) => !u.blocking);
+  const queued = all.length - collected.length;
   collectedCount.textContent = String(collected.length);
   collectedEmpty.hidden = collected.length > 0;
-  clearCollectedBtn.hidden = collected.length === 0;
+  collectedEmpty.textContent = t(queued ? "popup.nothingToReview" : "popup.nothingCollected");
+  // Clearing also cancels queued blocks, so keep it while anything is collected.
+  clearCollectedBtn.hidden = all.length === 0;
   reviewBtn.disabled = collected.length === 0;
   collectedList.replaceChildren(...collected.map(row));
+  inProgress.hidden = queued === 0;
+  inProgress.textContent = t("popup.inProgress", { n: queued });
 }
 
 async function save(): Promise<void> {
