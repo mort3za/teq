@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Teq store frames</title>
+    <!--
+      Frames for the Chrome Web Store images. Open with a hash and take a
+      screenshot at the size in brackets:
+        #1 … #5   screenshots    (1280×800)
+        #small    small promo    (440×280)
+        #marquee  marquee promo  (1400×560)
+      Raw screenshots come from shots/ (see ../screenshots.md).
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;800&display=swap" />
+    <style>
+      :root {
+        --red: #e5304a;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        font-family: Inter, system-ui, sans-serif;
+        color: #fff;
+        background:
+          radial-gradient(60% 70% at 100% 100%, #5a1a1f 0%, transparent 70%),
+          radial-gradient(40% 50% at 0% 0%, #1d2430 0%, transparent 70%),
+          #0e0f12;
+      }
+      em {
+        font-style: normal;
+        color: var(--red);
+      }
+      .frame {
+        position: relative;
+        width: 1280px;
+        height: 800px;
+      }
+      .head {
+        position: absolute;
+        left: 64px;
+        top: 40px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 44px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      .sub {
+        margin: 6px 0 0;
+        font-size: 20px;
+        color: #a8acb3;
+      }
+      .brand {
+        position: absolute;
+        right: 64px;
+        top: 70px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 24px;
+        font-weight: 800;
+      }
+      .brand img {
+        width: 40px;
+        height: 40px;
+      }
+      .window {
+        position: absolute;
+        left: 112px;
+        top: 170px;
+        width: 1056px;
+        height: 600px;
+        overflow: hidden;
+        border: 1px solid #2f3336;
+        border-radius: 14px;
+        background: #000;
+        box-shadow: 0 30px 80px #0009;
+      }
+      .window > img:first-child {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top left;
+      }
+      .popup {
+        position: absolute;
+        top: 8px;
+        right: 16px;
+        height: 584px;
+        border: 1px solid #3a3f44;
+        border-radius: 10px;
+        box-shadow: 0 16px 48px #000c;
+      }
+      /* promo tiles */
+      .tile {
+        position: relative;
+        overflow: hidden;
+      }
+      .logo-row {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        font-weight: 800;
+      }
+      .small {
+        width: 440px;
+        height: 280px;
+        padding: 64px 36px 0;
+      }
+      .small .logo-row {
+        font-size: 40px;
+        gap: 18px;
+      }
+      .small .logo-row img {
+        width: 56px;
+        height: 56px;
+      }
+      .small h2 {
+        margin: 24px 0 0;
+        font-size: 22px;
+        line-height: 1.3;
+        font-weight: 800;
+      }
+      .marquee {
+        width: 1400px;
+        height: 560px;
+        padding: 130px 80px 0;
+      }
+      .marquee .logo-row {
+        font-size: 56px;
+      }
+      .marquee .logo-row img {
+        width: 72px;
+        height: 72px;
+      }
+      .marquee h2 {
+        margin: 36px 0 0;
+        width: 520px;
+        font-size: 34px;
+        line-height: 1.25;
+        font-weight: 800;
+      }
+      .marquee ul {
+        margin: 28px 0 0;
+        padding: 0;
+        list-style: none;
+        font-size: 20px;
+        color: #c9ccd1;
+      }
+      .marquee li {
+        margin-top: 12px;
+      }
+      .marquee li::before {
+        content: "●";
+        color: var(--red);
+        font-size: 12px;
+        margin-right: 14px;
+        vertical-align: 3px;
+      }
+      .marquee .window {
+        left: 640px;
+        top: 60px;
+        width: 900px;
+        height: 512px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      const shots = {
+        1: ["Review the list, then <em>block</em>", "Every match waits for you. Nothing is blocked until you say so.", "review"],
+        2: ["Your words, your <em>rules</em>", "Add words, emoji or phrases. Teq collects the matching accounts as you scroll.", "x", "popup"],
+        3: ["See who was <em>collected</em>", "Search the list, see the matched rule, and import or export it as CSV.", "collected"],
+        4: ["Slow and <em>safe</em> by default", "About 30 seconds between blocks, with hourly and daily limits.", "options"],
+        5: ["A full <em>block log</em>", "Search every block, and export the log as CSV.", "blocks"],
+      };
+      const icon = "../../icons/icon128.png";
+      const tagline = "Find spam accounts on X by name, then <em>block</em> them safely";
+      const key = location.hash.slice(1) || "1";
+      const root = document.getElementById("root");
+
+      if (key === "small") {
+        root.innerHTML = `
+          <div class="tile small">
+            <div class="logo-row"><img src="${icon}" alt="" />Teq</div>
+            <h2>${tagline}</h2>
+          </div>`;
+      } else if (key === "marquee") {
+        root.innerHTML = `
+          <div class="tile marquee">
+            <div class="logo-row"><img src="${icon}" alt="" />Teq</div>
+            <h2>${tagline}</h2>
+            <ul>
+              <li>Match words, emoji and tweet phrases</li>
+              <li>Review the list before you block</li>
+              <li>Paced blocks with hourly and daily limits</li>
+            </ul>
+            <div class="window"><img src="shots/review.png" alt="" /></div>
+          </div>`;
+      } else {
+        const [title, sub, shot, popup] = shots[key];
+        root.innerHTML = `
+          <div class="frame">
+            <div class="head"><h1>${title}</h1><p class="sub">${sub}</p></div>
+            <div class="brand"><img src="${icon}" alt="" />Teq</div>
+            <div class="window">
+              <img src="shots/${shot}.png" alt="" />
+              ${popup ? `<img class="popup" src="shots/${popup}.png" alt="" />` : ""}
+            </div>
+          </div>`;
+      }
+    </script>
+  </body>
+</html>
