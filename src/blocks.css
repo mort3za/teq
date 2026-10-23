@@ -375,6 +375,7 @@ select#status:focus,
   margin: 24px 0 16px;
   border: 1px solid var(--border);
   border-radius: 12px;
+  background: color-mix(in srgb, currentColor 4%, transparent);
 }
 
 .advanced[open] {
@@ -432,7 +433,6 @@ select#status:focus,
 }
 
 .advanced-chevron {
-  color: var(--muted);
   transition: transform 0.2s ease;
 }
 

@@ -51,7 +51,7 @@ export const DEFAULT_CONFIG: Config = {
   persianNormalize: false,
   matchHandle: false,
   autoScroll: false,
-  scrollMaxFound: 500,
+  scrollMaxFound: 1000,
 };
 
 /** A matched user waiting to be reviewed and blocked. */
