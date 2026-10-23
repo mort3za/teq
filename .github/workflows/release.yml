@@ -46,11 +46,30 @@ jobs:
           jq 'del(.key)' dist/manifest.json > dist/manifest.tmp && mv dist/manifest.tmp dist/manifest.json
           (cd dist && zip -r "../teq-$GITHUB_REF_NAME-webstore.zip" .)
 
+      # The Chrome Web Store uses verified CRX uploads: the crx must be signed with the key whose
+      # public key is in the dashboard. The private key is the CRX_KEY secret (PEM text). It is not
+      # key.pem, which only sets the extension ID of unpacked installs. dist has no "key" now.
+      # Chrome needs a display to pack, so it runs under xvfb. Chrome writes dist.crx next to dist.
+      - name: Sign crx
+        env:
+          CRX_KEY: ${{ secrets.CRX_KEY }}
+        run: |
+          if [ -z "$CRX_KEY" ]; then
+            echo "::error::Secret CRX_KEY is not set"
+            exit 1
+          fi
+          key="$RUNNER_TEMP/crx-key.pem"
+          printf '%s\n' "$CRX_KEY" > "$key"
+          xvfb-run -a google-chrome --user-data-dir="$RUNNER_TEMP/chrome-profile" --no-message-box \
+            --pack-extension="$PWD/dist" --pack-extension-key="$key"
+          rm "$key"
+          mv dist.crx "teq-$GITHUB_REF_NAME-webstore.crx"
+
       - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" "teq-$GITHUB_REF_NAME.zip" "teq-$GITHUB_REF_NAME-webstore.zip" \
+          gh release create "$GITHUB_REF_NAME" "teq-$GITHUB_REF_NAME.zip" "teq-$GITHUB_REF_NAME-webstore.zip" "teq-$GITHUB_REF_NAME-webstore.crx" \
             --title "$GITHUB_REF_NAME" \
             --notes-from-tag \
             --verify-tag
