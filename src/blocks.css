@@ -132,7 +132,7 @@ h1 {
 .pager button,
 #search,
 #lang,
-#status,
+select#status,
 .field input[type="number"],
 .field select {
   box-sizing: border-box;
@@ -215,7 +215,7 @@ h1 {
 }
 
 #lang,
-#status,
+select#status,
 .field select {
   flex: none;
   padding-inline-end: 36px; /* room for the chevron (theme.css) */
@@ -239,18 +239,18 @@ h1 {
 /* A select moves its text by only half its top padding (measured), so it
    needs about twice the shift to line up with the inputs. */
 #lang,
-#status,
+select#status,
 .field select {
   padding-top: 5px;
 }
 
-:lang(fa) :is(#lang, #status, .field select) {
+:lang(fa) :is(#lang, select#status, .field select) {
   padding-top: 6px;
 }
 
 #search:focus,
 #lang:focus,
-#status:focus,
+select#status:focus,
 .field select:focus {
   outline: none;
   border-color: var(--accent);
@@ -369,15 +369,85 @@ h1 {
   margin-bottom: 16px;
 }
 
+/* A card, not a bare disclosure: many settings live in here, so the closed
+   state must read as a section you can open. */
 .advanced {
-  margin-bottom: 16px;
+  margin: 24px 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.advanced[open] {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
 }
 
 .advanced > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 11px;
   cursor: pointer;
+  list-style: none;
+}
+
+.advanced > summary::-webkit-details-marker {
+  display: none;
+}
+
+.advanced > summary:hover {
+  background: var(--icon-btn-hover-bg);
+}
+
+.advanced > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.advanced[open] > summary {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.advanced > summary > .icon {
+  color: var(--accent);
+}
+
+.advanced-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.advanced-title {
+  font-size: 15px;
   font-weight: 600;
-  width: fit-content;
-  margin-bottom: 16px;
+}
+
+.advanced-hint {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.advanced-chevron {
+  color: var(--muted);
+  transition: transform 0.2s ease;
+}
+
+.advanced[open] .advanced-chevron {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .advanced-chevron {
+    transition: none;
+  }
+}
+
+.advanced-body {
+  padding: 16px 16px 0;
 }
 
 .warning {
