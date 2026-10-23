@@ -1,0 +1,41 @@
+/* Shared design tokens. Every extension page links this file, and review.ts
+   inlines it into the overlay's Shadow DOM, so each value lives only here. */
+:root,
+:host {
+  --persian-red: #cc3333;
+  --accent: #1d9bf0;
+  --muted: #888;
+  --border: #8884;
+  /* One hover look for every icon-only button. */
+  --icon-btn-hover-bg: color-mix(in srgb, currentColor 14%, transparent);
+  /* One height for every button, input and select. */
+  --control-h: 36px;
+  /* Lucide chevron-down in the muted gray, readable on light and dark. */
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+/* The native select arrow sits 3px from the edge in RTL but 8px in LTR, and
+   a little high. Draw one chevron instead, 12px from the edge on either side.
+   Pages set background-color (not the shorthand) so this image stays. */
+select {
+  appearance: none;
+  background-image: var(--select-chevron);
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+  background-position: right 12px center;
+}
+
+[dir="rtl"] select {
+  background-position: left 12px center;
+}
+
+/* Vazirmatn's line box keeps extra room above and below for Persian marks, so
+   button labels sat a little high. Trim each label to its letters (cap height
+   for Latin, x-height for Persian) so flex centering is also optical centering. */
+:is(button, .nav-link, .sponsor):not(.tile) > span {
+  text-box: trim-both cap alphabetic;
+}
+
+:lang(fa) :is(button, .nav-link, .sponsor):not(.tile) > span {
+  text-box: trim-both ex alphabetic;
+}

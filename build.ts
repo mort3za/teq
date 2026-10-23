@@ -29,6 +29,8 @@ async function build(): Promise<void> {
     ["manifest.json", "manifest.json"],
     ["popup.html", "src/popup.html"],
     ["popup.css", "src/popup.css"],
+    ["fonts.css", "src/fonts.css"],
+    ["theme.css", "src/theme.css"],
     ["blocks.html", "src/blocks.html"],
     ["blocks.css", "src/blocks.css"],
     ["collected.html", "src/collected.html"],
@@ -42,6 +44,11 @@ async function build(): Promise<void> {
     ["icons/icon128.png", "icons/icon128.png"],
   ] as const) {
     await Bun.write(`${OUT}/${dest}`, Bun.file(src));
+  }
+  // Bundled Vazirmatn (see src/fonts.css).
+  for (const sub of ["arabic", "latin", "latin-ext"]) {
+    const file = `vazirmatn-${sub}-wght-normal.woff2`;
+    await Bun.write(`${OUT}/fonts/${file}`, Bun.file(`node_modules/@fontsource-variable/vazirmatn/files/${file}`));
   }
 
   console.log(`Built → ${OUT}/  (${new Date().toLocaleTimeString()})`);
