@@ -20,7 +20,7 @@ test("t substitutes {named} placeholders", () => {
 test("t falls back to English, then to the raw key", () => {
   setLang("fa");
   // a key only present in English still resolves via the English fallback
-  expect(t("popup.title")).toBe("تک... بلاکشون کن!");
+  expect(t("popup.title")).toBe("تق... بلاکشون کن!");
   // an unknown key returns the key itself
   expect(t("does.not.exist")).toBe("does.not.exist");
   setLang("en");

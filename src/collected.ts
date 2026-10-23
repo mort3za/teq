@@ -12,6 +12,7 @@ import { langName, langOptions } from "./lang.ts";
 import { toCsv, parseCsv, downloadCsv, pickCsv } from "./csv.ts";
 import { watchNavCount } from "./nav.ts";
 import { applyI18n, setLang, t } from "./i18n.ts";
+import { X_ICON } from "./icons.ts";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -73,11 +74,13 @@ function render(): void {
       link.href = `https://x.com/${u.handle}`;
       link.target = "_blank";
       link.rel = "noreferrer";
-      link.textContent = `@${u.handle}`;
+      // ⁦…⁩ isolates the handle so RTL layout can't move the "@" to its far side.
+      link.textContent = `\u2066@${u.handle}\u2069`;
 
       const name = document.createElement("span");
       name.className = "name";
       name.textContent = u.name;
+      name.dir = "auto"; // a Latin name on an RTL page keeps its own punctuation order
 
       const meta = document.createElement("span");
       meta.className = "date";
@@ -93,9 +96,10 @@ function render(): void {
 
       const rm = document.createElement("button");
       rm.type = "button";
-      rm.className = "remove";
+      rm.className = "icon-btn remove";
       rm.title = t("common.remove");
-      rm.textContent = "✕";
+      rm.setAttribute("aria-label", t("common.remove"));
+      rm.innerHTML = X_ICON;
       rm.addEventListener("click", async () => {
         await removeCollected(u.handle);
         await load();
