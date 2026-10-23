@@ -1,5 +1,6 @@
 // Sidebar: keep the "(N)" badges in front of the Collected and Blocked nav links
-// in sync with their counts. Shared by every page that renders the sidebar.
+// in sync with their counts, and show the extension version under the GitHub
+// link. Shared by every page that renders the sidebar.
 
 import { getCollected, getIgnored, getLog } from "./storage.ts";
 
@@ -22,8 +23,11 @@ async function syncBlocked(): Promise<void> {
   setBadge("navCountBlocked", handles.size);
 }
 
-/** Render the counts now and refresh them whenever their lists change. */
+/** Render the counts now and refresh them whenever their lists change. Also
+ * fills in the sidebar's version line. */
 export function watchNavCount(): void {
+  const version = document.getElementById("version");
+  if (version) version.textContent = `v${chrome.runtime.getManifest().version}`;
   void syncCollected();
   void syncIgnored();
   void syncBlocked();

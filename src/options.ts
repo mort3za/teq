@@ -183,7 +183,5 @@ importBtn.addEventListener("click", () => {
   input.click();
 });
 
-$<HTMLElement>("version").textContent = `v${chrome.runtime.getManifest().version}`;
-
 void load();
 watchNavCount();
