@@ -3,7 +3,8 @@
 import { getLog, getConfig, clearLog, type LogEntry } from "./storage.ts";
 import { toCsv, downloadCsv } from "./csv.ts";
 import { watchNavCount } from "./nav.ts";
-import { applyI18n, setLang, t } from "./i18n.ts";
+import { applyI18n, getLang, setLang, t } from "./i18n.ts";
+import { exactTime, relativeTime } from "./time.ts";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -22,11 +23,6 @@ const PAGE_SIZE = 25;
 
 let entries: LogEntry[] = []; // deduped, most-recent-first
 let page = 0;
-
-const dateFmt = new Intl.DateTimeFormat(undefined, {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
 
 /** Collapse the raw log to one row per handle, keeping the most recent block. */
 function dedupe(log: LogEntry[]): LogEntry[] {
@@ -64,16 +60,19 @@ function render(): void {
       link.href = `https://x.com/${e.handle}`;
       link.target = "_blank";
       link.rel = "noreferrer";
-      link.textContent = `@${e.handle}`;
+      // ⁦…⁩ isolates the handle so RTL layout can't move the "@" to its far side.
+      link.textContent = `\u2066@${e.handle}\u2069`;
 
       const name = document.createElement("span");
       name.className = "name";
       name.textContent = e.name;
+      name.dir = "auto"; // a Latin name on an RTL page keeps its own punctuation order
 
       const date = document.createElement("time");
       date.className = "date";
       date.dateTime = new Date(e.at).toISOString();
-      date.textContent = dateFmt.format(e.at);
+      date.textContent = relativeTime(e.at, Date.now(), getLang());
+      date.title = exactTime(e.at, getLang());
 
       li.append(link, name, date);
       return li;

@@ -10,7 +10,9 @@ import {
   type IgnoredUser,
 } from "./storage.ts";
 import { watchNavCount } from "./nav.ts";
-import { applyI18n, setLang, t } from "./i18n.ts";
+import { applyI18n, getLang, setLang, t } from "./i18n.ts";
+import { exactTime, relativeTime } from "./time.ts";
+import { X_ICON } from "./icons.ts";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -28,11 +30,6 @@ const PAGE_SIZE = 25;
 
 let users: IgnoredUser[] = []; // most-recently ignored first
 let page = 0;
-
-const dateFmt = new Intl.DateTimeFormat(undefined, {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
 
 function filtered(): IgnoredUser[] {
   const q = searchEl.value.trim().toLowerCase();
@@ -59,22 +56,26 @@ function render(): void {
       link.href = `https://x.com/${u.handle}`;
       link.target = "_blank";
       link.rel = "noreferrer";
-      link.textContent = `@${u.handle}`;
+      // ⁦…⁩ isolates the handle so RTL layout can't move the "@" to its far side.
+      link.textContent = `\u2066@${u.handle}\u2069`;
 
       const name = document.createElement("span");
       name.className = "name";
       name.textContent = u.name;
+      name.dir = "auto"; // a Latin name on an RTL page keeps its own punctuation order
 
       const date = document.createElement("time");
       date.className = "date";
       date.dateTime = new Date(u.at).toISOString();
-      date.textContent = dateFmt.format(u.at);
+      date.textContent = relativeTime(u.at, Date.now(), getLang());
+      date.title = exactTime(u.at, getLang());
 
       const rm = document.createElement("button");
       rm.type = "button";
-      rm.className = "remove";
+      rm.className = "icon-btn remove";
       rm.title = t("common.remove");
-      rm.textContent = "✕";
+      rm.setAttribute("aria-label", t("common.remove"));
+      rm.innerHTML = X_ICON;
       rm.addEventListener("click", async () => {
         await removeIgnored(u.handle);
         await load();
