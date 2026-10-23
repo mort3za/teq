@@ -6,7 +6,8 @@
 // run; an open port keeps this worker alive. Outside a run the worker is woken
 // by storage changes (it may sleep between them — the painted icon persists).
 
-import { getBlockProgress, getCollected } from "./storage.ts";
+import { extendRateLimit, getBlockProgress, getCollected } from "./storage.ts";
+import { rateLimitUntil } from "./pacing.ts";
 
 const GREEN = "#00ba7c";
 const YELLOW = "#f5b800";
@@ -86,3 +87,17 @@ chrome.runtime.onConnect.addListener((port) => {
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "local" && (changes.blockProgress || changes.collected)) void syncDot();
 });
+
+// X's own page requests (search, timelines) and our blocks both go to x.com's
+// /i/api/. The content script can't see the page's responses, but this worker
+// can: on a 429 "too many requests", hold every automatic request (auto-scroll,
+// block run) until X's limit window resets.
+chrome.webRequest.onCompleted.addListener(
+  (d) => {
+    if (d.statusCode !== 429) return;
+    const reset = d.responseHeaders?.find((h) => h.name.toLowerCase() === "x-rate-limit-reset");
+    void extendRateLimit(rateLimitUntil(reset?.value));
+  },
+  { urls: ["*://x.com/i/api/*", "*://twitter.com/i/api/*"] },
+  ["responseHeaders"],
+);

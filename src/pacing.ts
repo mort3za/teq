@@ -78,3 +78,18 @@ export function fmtDuration(ms: number): string {
   const h = Math.floor(m / 60);
   return `${h}h ${m % 60}m`;
 }
+/** Shortest hold on all automatic requests (auto-scroll, block run) after X
+ * answers 429 "too many requests". */
+export const RATE_LIMIT_MS = 5 * 60 * 1000;
+
+/**
+ * Epoch-ms until which automatic requests hold still after a 429: at least
+ * RATE_LIMIT_MS from `now`, or later when X's `x-rate-limit-reset` header (epoch
+ * seconds) says its window resets later. A reset over an hour away is ignored
+ * as bogus. `now` is injectable for tests.
+ */
+export function rateLimitUntil(resetHeader?: string, now: number = Date.now()): number {
+  const until = now + RATE_LIMIT_MS;
+  const reset = Number(resetHeader) * 1000;
+  return reset > until && reset - now <= HOUR_MS ? reset : until;
+}

@@ -7,7 +7,7 @@ import { extractUser, richText, tweetTextEl } from "./extract.ts";
 import { blockUser, BlockError } from "./blocker.ts";
 import { openReview, type BlockProgress } from "./review.ts";
 import { startMarks } from "./marks.ts";
-import { blockDelayMs, capReached, capRetryMs, fmtDuration } from "./pacing.ts";
+import { blockDelayMs, capReached, capRetryMs, fmtDuration, rateLimitUntil } from "./pacing.ts";
 import { setLang, t } from "./i18n.ts";
 import {
   getConfig,
@@ -25,6 +25,8 @@ import {
   setBlockProgress,
   getBlockQueue,
   setBlockQueue,
+  getRateLimitedUntil,
+  extendRateLimit,
   type CollectedUser,
 } from "./storage.ts";
 
@@ -219,6 +221,31 @@ async function waitOutCap(): Promise<void> {
   }
 }
 
+/**
+ * Block while X's 429 hold (set by the service worker, or by a 429 on a block)
+ * runs out, then return so the drain loop takes the next target. Like
+ * waitOutCap: re-read each pass, returns early if the user pauses.
+ */
+async function waitOutRateLimit(): Promise<void> {
+  while (!paused) {
+    const waitMs = (await getRateLimitedUntil()) - Date.now();
+    if (waitMs <= 0) break;
+    setLang((await getConfig()).lang);
+    await reportProgress({
+      done: blockDone,
+      total: blockTotal,
+      phase: "waiting",
+      error: t("run.rateLimited", { time: fmtDuration(waitMs) }),
+      resumeAt: Date.now() + waitMs,
+    });
+    await sleep(Math.min(waitMs + 1000, CAP_RECHECK_MS));
+  }
+  if (!paused) {
+    await setLastError(null);
+    await reportProgress({ done: blockDone, total: blockTotal, phase: "blocking" });
+  }
+}
+
 async function drain(): Promise<void> {
   draining = true;
   try {
@@ -244,6 +271,13 @@ async function drainQueue(): Promise<void> {
     // one drain. When a cap is hit we don't stop: we wait out the rolling window
     // (the oldest blocks age past the trailing hour/day boundary and free a
     // slot) and auto-resume, rather than blocking through X's thresholds.
+    // X answered 429 somewhere (its own search/timeline loads count too): hold
+    // until its limit window resets, then carry on by itself.
+    if ((await getRateLimitedUntil()) > Date.now()) {
+      await waitOutRateLimit();
+      continue;
+    }
+
     const cfg = await getConfig();
     const log = await getLog();
     const cap = capReached(log.map((e) => e.at), cfg.maxPerHour, cfg.maxPerDay);
@@ -298,10 +332,16 @@ async function drainQueue(): Promise<void> {
       const status = err instanceof BlockError ? err.status : -1;
       const message = String(err instanceof Error ? err.message : err);
       await setLastError(message);
-      // Rate-limited or auth-rejected: pause the run (resumable) rather than
-      // killing it. The target stays at the front of the queue so resuming
-      // retries it — the wait-while-paused gate at the loop top holds.
-      if (status === 429 || status === 403 || status === 401) {
+      // Rate-limited: hold (the 429 gate at the loop top waits it out), then
+      // retry this target — it stays at the front of the queue.
+      if (status === 429) {
+        await extendRateLimit(rateLimitUntil());
+        continue;
+      }
+      // Auth-rejected: pause the run (resumable) rather than killing it. The
+      // target stays at the front of the queue so resuming retries it — the
+      // wait-while-paused gate at the loop top holds.
+      if (status === 403 || status === 401) {
         pauseRun(message);
         continue;
       }

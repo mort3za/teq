@@ -105,6 +105,7 @@ const PROGRESS_KEY = "blockProgress";
 const QUEUE_KEY = "blockQueue";
 const IGNORED_KEY = "ignored";
 const TIP_KEY = "tipDismissed";
+const RATE_LIMIT_KEY = "rateLimitedUntil";
 const LOG_LIMIT = 500;
 
 export async function getConfig(): Promise<Config> {
@@ -253,4 +254,18 @@ export async function getTipDismissed(): Promise<boolean> {
 
 export async function dismissTip(): Promise<void> {
   await chrome.storage.local.set({ [TIP_KEY]: true });
+}
+/** Epoch-ms until which automatic requests (auto-scroll, block run) hold still
+ * because X answered 429 "too many requests". 0 or past = not limited. */
+export async function getRateLimitedUntil(): Promise<number> {
+  const { [RATE_LIMIT_KEY]: until } = await chrome.storage.local.get(RATE_LIMIT_KEY);
+  return (until as number | undefined) ?? 0;
+}
+
+/** Hold automatic requests until `until`. Only extends: a shorter hold never
+ * cuts a longer one already set. */
+export async function extendRateLimit(until: number): Promise<void> {
+  if (until > (await getRateLimitedUntil())) {
+    await chrome.storage.local.set({ [RATE_LIMIT_KEY]: until });
+  }
 }

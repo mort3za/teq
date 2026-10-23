@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { blockDelayMs, PACING_JITTER, capReached, capRetryMs, fmtDuration } from "./pacing.ts";
+import { blockDelayMs, PACING_JITTER, capReached, capRetryMs, fmtDuration, rateLimitUntil, RATE_LIMIT_MS } from "./pacing.ts";
 test("with zero jitter the delay is exactly the configured pacing", () => {
   expect(blockDelayMs(30, 0)).toBe(30_000);
   expect(blockDelayMs(5, 0)).toBe(5_000);
@@ -103,4 +103,20 @@ test("fmtDuration formats seconds, minutes, and hours", () => {
   expect(fmtDuration(HOUR)).toBe("1h 0m");
   expect(fmtDuration(2 * HOUR + 5 * MIN)).toBe("2h 5m");
   expect(fmtDuration(-1000)).toBe("0s");
+});
+test("a 429 holds requests for RATE_LIMIT_MS when X sends no reset time", () => {
+  expect(rateLimitUntil(undefined, 1_000)).toBe(1_000 + RATE_LIMIT_MS);
+  expect(rateLimitUntil("garbage", 1_000)).toBe(1_000 + RATE_LIMIT_MS);
+});
+
+test("a 429 holds until X's reset time when that is later", () => {
+  const now = 1_700_000_000_000;
+  const reset = now + 12 * 60_000;
+  expect(rateLimitUntil(String(reset / 1000), now)).toBe(reset);
+});
+
+test("a 429 never holds shorter than RATE_LIMIT_MS, nor trusts a reset over an hour away", () => {
+  const now = 1_700_000_000_000;
+  expect(rateLimitUntil(String((now + 30_000) / 1000), now)).toBe(now + RATE_LIMIT_MS);
+  expect(rateLimitUntil(String((now + 2 * 3_600_000) / 1000), now)).toBe(now + RATE_LIMIT_MS);
 });

@@ -180,6 +180,8 @@ const en: Dict = {
   "run.dailyLimit": "Daily limit ({n})",
   "run.hourlyLimit": "Hourly limit ({n})",
   "run.capReached": "{limit} reached — auto-resuming in {time}.",
+  "run.rateLimited": "X says too many requests (429) — auto-resuming in {time}.",
+
 };
 
 const fa: Dict = {
@@ -342,6 +344,8 @@ const fa: Dict = {
   "run.dailyLimit": "محدودیت روزانه ({n})",
   "run.hourlyLimit": "محدودیت ساعتی ({n})",
   "run.capReached": "{limit} رسید — ازسرگیری خودکار در {time}.",
+  "run.rateLimited": "ایکس می‌گوید درخواست‌ها زیاد است (۴۲۹) — ازسرگیری خودکار در {time}.",
+
 };
 
 const DICTS: Record<Lang, Dict> = { en, fa };
