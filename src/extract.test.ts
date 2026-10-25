@@ -7,7 +7,7 @@ beforeAll(() => GlobalRegistrator.register());
 afterAll(() => GlobalRegistrator.unregister());
 
 // Imported after the DOM globals exist.
-const { extractUser, richText, tweetTextEl } = await import("./extract.ts");
+const { extractUser, richText, tweetTextEl, userCells } = await import("./extract.ts");
 const { matchReason } = await import("./matcher.ts");
 
 /** Parse an HTML string and return its first [data-testid="User-Name"] cell. */
@@ -164,4 +164,49 @@ test("a neighbouring article's tweet text is never picked up", () => {
     </article>`;
   const el = document.getElementById("second")!;
   expect(richText(tweetTextEl(el)!).trim()).toBe("second tweet");
+});
+
+/**
+ * A followers / following list row the way x.com draws it: avatar link, name
+ * link, @handle link, "Follows you", a Follow button and the bio — no
+ * "User-Name" container. Hashed class names on purpose, as in buildCell().
+ */
+function buildUserCell(handle: string, nameHtml: string, bio: string): string {
+  return `
+    <div data-testid="cellInnerDiv">
+      <button data-testid="UserCell" role="button" class="css-175oi2r r-1mmae3n">
+        <div data-testid="UserAvatar-Container-${handle}">
+          <a href="/${handle}" aria-hidden="true" role="link" tabindex="-1"><img alt="" src="https://pbs.twimg.com/profile_images/1/a.jpg" /></a>
+        </div>
+        <a href="/${handle}" role="link" class="r-1loqt21"><div dir="ltr"><span class="css-1jxf684">${nameHtml}</span></div></a>
+        <a href="/${handle}" role="link" tabindex="-1"><span class="r-poiln3">@${handle}</span></a>
+        <div data-testid="userFollowIndicator"><span>Follows you</span></div>
+        <button data-testid="1234-follow" role="button"><span>Follow</span></button>
+        <div dir="auto"><span>${bio}</span></div>
+      </button>
+    </div>`;
+}
+
+test("followers list: UserCell rows are scanned and their name extracted", () => {
+  document.body.innerHTML =
+    buildUserCell("luna_p", '<span>Luna Park </span><img alt="🐙" src="https://abs.twimg.com/emoji/v2/svg/1f419.svg" />', "I love @someone and crypto") +
+    buildUserCell("jane_doe", "<span>Jane Doe</span>", "");
+  const users = userCells(document).map(extractUser);
+  expect(users).toEqual([
+    { handle: "luna_p", name: "Luna Park 🐙" },
+    { handle: "jane_doe", name: "Jane Doe" },
+  ]);
+  // Not part of a tweet, so no tweet text is picked up.
+  expect(tweetTextEl(userCells(document)[0]!)).toBeNull();
+});
+
+test("a UserCell that holds a User-Name container is scanned once", () => {
+  document.body.innerHTML = `
+    <div data-testid="UserCell">
+      <div data-testid="User-Name"><a href="/jane_doe"><span>Jane Doe</span></a><a href="/jane_doe"><span>@jane_doe</span></a></div>
+    </div>
+    <article><div data-testid="User-Name"><a href="/tweeter"><span>Tweeter</span></a></div></article>`;
+  const cells = userCells(document);
+  expect(cells.map((el) => el.getAttribute("data-testid"))).toEqual(["User-Name", "User-Name"]);
+  expect(cells.map((el) => extractUser(el)!.handle)).toEqual(["jane_doe", "tweeter"]);
 });

@@ -3,7 +3,7 @@
 // separate, explicit step driven from the popup.
 
 import { matchReason } from "./matcher.ts";
-import { extractUser, richText, tweetTextEl } from "./extract.ts";
+import { extractUser, richText, tweetTextEl, userCells } from "./extract.ts";
 import { blockUser, BlockError } from "./blocker.ts";
 import { openReview, type BlockProgress } from "./review.ts";
 import { isAutoScrolling, noteFound, startAutoScroll, stopAutoScroll } from "./autoscroll.ts";
@@ -113,7 +113,7 @@ async function scan(): Promise<number> {
   for (const u of await getIgnored()) existing.add(u.handle.toLowerCase());
   const found: CollectedUser[] = [];
 
-  for (const el of document.querySelectorAll('[data-testid="User-Name"]')) {
+  for (const el of userCells(document)) {
     const user = extractUser(el);
     if (!user) continue;
 

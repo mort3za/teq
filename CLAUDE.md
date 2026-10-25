@@ -35,7 +35,9 @@ src/content.ts   Content script on x.com. Auto-scans the DOM on an interval,
                  "review" opens the overlay;
                  "autoScroll"/"stopAutoScroll" drive autoscroll.ts.
 src/extract.ts   Pure DOM extraction for a "User-Name" cell (no chrome) —
-                 unit-testable. extractUser() pulls { handle, name }; richText()
+                 unit-testable. userCells() lists cells to scan ("User-Name" +
+                 followers/following "UserCell" rows); extractUser() pulls
+                 { handle, name }; richText()
                  restores Twemoji <img> emoji. Keys only off stable, semantic
                  signals, never X's build-hashed CSS classes.
 src/matcher.ts   Pure match logic (no DOM/chrome) — unit-testable. matchReason()

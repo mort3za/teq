@@ -39,7 +39,24 @@ export function tweetTextEl(userNameEl: Element): Element | null {
   return scope?.querySelector('[data-testid="tweetText"]') ?? null;
 }
 
-/** Extract { handle, name } from a [data-testid="User-Name"] container. */
+/**
+ * Every rendered user cell to scan: the "User-Name" container of tweets, plus
+ * the [data-testid="UserCell"] rows of the followers / following / verified
+ * followers / followers-you-follow lists, which show a name and @handle but no
+ * "User-Name" container. A UserCell that does hold one is left to that one.
+ */
+export function userCells(root: ParentNode): Element[] {
+  const cells = [...root.querySelectorAll('[data-testid="User-Name"]')];
+  for (const el of root.querySelectorAll('[data-testid="UserCell"]')) {
+    if (!el.querySelector('[data-testid="User-Name"]')) cells.push(el);
+  }
+  return cells;
+}
+
+/**
+ * Extract { handle, name } from a cell given by userCells(). In a UserCell the
+ * bio and "Follow" button come after the @handle, so the name slice holds.
+ */
 export function extractUser(el: Element): { handle: string; name: string } | null {
   let handle = "";
   for (const a of el.querySelectorAll('a[href^="/"]')) {
